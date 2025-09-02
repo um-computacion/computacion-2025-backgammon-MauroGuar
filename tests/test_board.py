@@ -2,7 +2,7 @@ import unittest
 from core.Board import Board
 
 
-class BoardTest(unittest.TestCase):
+class TestBoard(unittest.TestCase):
     """Conjunto de pruebas para la clase Board."""
 
     def setUp(self):
