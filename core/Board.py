@@ -37,14 +37,6 @@ class Board:
         if not self.__top_board_triangles__ or not self.__bot_board_triangles__:
             self.new_game_board()
 
-    def new_game_board(self):
-        """Resetea el tablero de juego a un estado inicial."""
-        self.__top_board_triangles__ = [[5, 0, "●"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [3, 0, "○"], [0, 0, " "],
-                                        [5, 0, "○"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [0, 0, " "], [2, 0, "●"]]
-
-        self.__bot_board_triangles__ = [[5, 0, "○"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [3, 0, "●"], [0, 0, " "],
-                                        [5, 0, "●"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [0, 0, " "], [2, 0, "○"]]
-
     @property
     def top_board_triangles(self) -> list:
         """La lista con los triángulos de la parte superior."""
@@ -54,3 +46,11 @@ class Board:
     def bot_board_triangles(self) -> list:
         """La lista con los triángulos de la parte inferior."""
         return self.__bot_board_triangles__
+
+    def new_game_board(self):
+        """Resetea el tablero de juego a un estado inicial."""
+        self.__top_board_triangles__ = [[5, 0, "●"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [3, 0, "○"], [0, 0, " "],
+                                        [5, 0, "○"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [0, 0, " "], [2, 0, "●"]]
+
+        self.__bot_board_triangles__ = [[5, 0, "○"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [3, 0, "●"], [0, 0, " "],
+                                        [5, 0, "●"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [0, 0, " "], [2, 0, "○"]]
