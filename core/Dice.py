@@ -8,9 +8,9 @@ class Dice:
     y obtener una representación ASCII del mismo.
 
     Attributes:
+        DICES_STR: Un diccionario de clase (estático) que mapea el valor numérico de un dado (0-6) a su representación ASCII como una tupla de cadenas.
         __dice_number__: Un entero que representa el valor numérico actual del dado.
-        __dice_str__: Una tupla de cadenas de texto que forma una representación
-          ASCII del valor actual del dado.
+        __dice_str__: Una tupla de cadenas de texto que forma una representación ASCII del valor actual del dado.
     """
     DICES_STR = {
         0: ("┌─────────┐",
