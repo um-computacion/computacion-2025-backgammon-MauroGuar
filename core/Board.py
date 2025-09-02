@@ -21,6 +21,7 @@ class Board:
         __top_board_triangles__: Una lista que contiene los triángulos superiores.
         __bot_board_triangles__: Una lista que contiene los triángulos inferiores.
     """
+
     def __init__(self, top_board_triangles: list = None, bot_board_triangles: list = None):
         """Inicializa una instancia de tablero de juego.
 
@@ -43,3 +44,13 @@ class Board:
 
         self.__bot_board_triangles__ = [[5, 0, "○"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [3, 0, "●"], [0, 0, " "],
                                         [5, 0, "●"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [0, 0, " "], [2, 0, "○"]]
+
+    @property
+    def top_board_triangles(self) -> list:
+        """La lista con los triángulos de la parte superior."""
+        return self.__top_board_triangles__
+
+    @property
+    def bot_board_triangles(self) -> list:
+        """La lista con los triángulos de la parte inferior."""
+        return self.__bot_board_triangles__
