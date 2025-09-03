@@ -54,3 +54,58 @@ class Board:
 
         self.__bot_board_triangles__ = [[5, 0, "○"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [3, 0, "●"], [0, 0, " "],
                                         [5, 0, "●"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [0, 0, " "], [2, 0, "○"]]
+    
+    def map_normal_index(self, normal_index: int, uses_white_checkers: bool) -> tuple[bool, int]:
+        """Mapea la entrada de índice normal a un índice compatible con las listas de triángulos.
+
+        Args:
+            normal_index: El índice normal (1-24).
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+        Returns:
+            Una tupla que contiene un booleano que indica
+            si el triángulo está en la parte superior o no
+            y el índice correspondiente en la lista de triángulos.
+        """
+        # Si el jugador usa fichas blancas, los triángulos 1-12
+        # están en la parte superior y los triángulos 13-24
+        # están en la parte inferior.
+        if uses_white_checkers:
+            if 1 <= normal_index <= 12:
+                return True, 12 - normal_index
+            elif 13 <= normal_index <= 24:
+                return False, 24 - normal_index
+
+        # Si el jugador usa fichas negras, los triángulos 1-12
+        # están en la parte inferior y los triángulos 13-24
+        # están en la parte superior.
+        else:
+            if 1 <= normal_index <= 12:
+                return False, normal_index - 1
+            elif 13 <= normal_index <= 24:
+                return True, normal_index - 13
+
+    def replace_triangle(self, normal_index: int, uses_white_checkers: bool, new_triangle: list):
+        """Reemplaza un triángulo en el tablero de juego.
+
+        Args:
+            normal_index: El ínidce normal (1-24).
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+            new_triangle: El nuevo triángulo que reemplazará al existente.
+        """
+        is_top, index = self.map_normal_index(normal_index, uses_white_checkers)
+        if is_top:
+            self.__top_board_triangles__[index] = new_triangle
+        else:
+            self.__bot_board_triangles__[index] = new_triangle
+            
+    def replace_multiple_triangles(self, replacements: list, uses_white_checkers: bool):
+        """Reemplaza múltiples triángulos en el tablero de juego.
+
+        Args:
+            replacements: Una lista de tuplas, cada una conteniendo
+                        el índice normal (1-24) y el nuevo triángulo.
+                        Ejemplo: [(1, [3, 0, "●"]), (13, [2, 0, "○"])]
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+        """
+        for normal_index, new_triangle in replacements:
+            self.replace_triangle(normal_index, uses_white_checkers, new_triangle)    
