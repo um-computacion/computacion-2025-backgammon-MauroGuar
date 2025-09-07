@@ -21,41 +21,22 @@ class Board:
         __top_board_triangles__: Una lista que contiene los triángulos superiores.
         __bot_board_triangles__: Una lista que contiene los triángulos inferiores.
     """
-
-    def __init__(self, top_board_triangles: list = None, bot_board_triangles: list = None):
-        """Inicializa una instancia de tablero de juego.
-
-        Si no se proporcionan los triángulos superiores o inferiores,
-        se crea una nueva.
-
-        Args:
-            top_board_triangles: Una lista con los triángulos superiores. Valor default: None.
-            bot_board_triangles: Una lista con los triángulos inferiores. Valor default: None.
-        """
-        self.__top_board_triangles__ = top_board_triangles
-        self.__bot_board_triangles__ = bot_board_triangles
-        if not self.__top_board_triangles__ or not self.__bot_board_triangles__:
-            self.new_game_board()
-
-    @property
-    def top_board_triangles(self) -> list:
-        """La lista con los triángulos de la parte superior."""
-        return self.__top_board_triangles__
-
-    @property
-    def bot_board_triangles(self) -> list:
-        """La lista con los triángulos de la parte inferior."""
-        return self.__bot_board_triangles__
+    def __init__(self):
+        """Inicializa una instancia de tablero de juego por defecto."""
+        self.__top_board_triangles__ = []
+        self.__bot_board_triangles__ = []
+        self.new_game_board()
 
     def new_game_board(self):
-        """Resetea el tablero de juego a un estado inicial."""
+        """Resetea el tablero de juego a un estado inicial por defecto."""
         self.__top_board_triangles__ = [[5, 0, "●"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [3, 0, "○"], [0, 0, " "],
                                         [5, 0, "○"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [0, 0, " "], [2, 0, "●"]]
 
         self.__bot_board_triangles__ = [[5, 0, "○"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [3, 0, "●"], [0, 0, " "],
                                         [5, 0, "●"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [0, 0, " "], [2, 0, "○"]]
-    
-    def map_normal_index(self, normal_index: int, uses_white_checkers: bool) -> tuple[bool, int]:
+
+    @staticmethod
+    def map_normal_index(normal_index: int, uses_white_checkers: bool) -> tuple[bool, int]:
         """Mapea la entrada de índice normal a un índice compatible con las listas de triángulos.
 
         Args:
@@ -97,7 +78,7 @@ class Board:
             self.__top_board_triangles__[index] = new_triangle
         else:
             self.__bot_board_triangles__[index] = new_triangle
-            
+
     def replace_multiple_triangles(self, replacements: list, uses_white_checkers: bool):
         """Reemplaza múltiples triángulos en el tablero de juego.
 
@@ -108,4 +89,38 @@ class Board:
             uses_white_checkers: Indica si el jugador usa fichas blancas.
         """
         for normal_index, new_triangle in replacements:
-            self.replace_triangle(normal_index, uses_white_checkers, new_triangle)    
+            self.replace_triangle(normal_index, uses_white_checkers, new_triangle)
+
+    def verify_checker_placement(self, normal_index: int, uses_white_checkers: bool) -> bool:
+        """Verifica si una ficha puede ser colocada en un triángulo específico.
+
+        Args:
+            normal_index: El índice normal (1-24).
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+        Returns:
+            True si la ficha puede ser colocada, False en caso contrario.
+        """
+        # Mapea el índice normal al índice de la lista correspondiente
+        is_top, index = self.map_normal_index(normal_index, uses_white_checkers)
+        # Obtiene el triángulo a verificar
+        if is_top:
+            verify_triangle = self.__top_board_triangles__[index]
+        else:
+            verify_triangle = self.__bot_board_triangles__[index]
+
+        # Si el triángulo está vacío, se puede colocar la ficha
+        if verify_triangle[0] == 0:
+            return True
+
+        if verify_triangle[0] > 0:
+            # Si el triángulo tiene fichas del mismo color, se puede colocar la ficha
+            if ((uses_white_checkers and verify_triangle[2] == "●") or
+                    (not uses_white_checkers and verify_triangle[2] == "○")):
+                return True
+
+            # Si el triángulo tiene una sola ficha del color opuesto, se puede colocar la ficha
+            elif verify_triangle[0] == 1:
+                return True
+
+        # Si ninguna de las condiciones anteriores se cumple, no se puede colocar la ficha
+        return False

@@ -4,7 +4,6 @@ from core.Board import Board
 
 class TestBoard(unittest.TestCase):
     """Conjunto de pruebas para la clase Board."""
-
     def setUp(self):
         """Prepara los recursos necesarios para cada prueba.
 
@@ -20,55 +19,19 @@ class TestBoard(unittest.TestCase):
         # Crea una instancia de Board para ser usada en las pruebas
         self.board = Board()
 
-    def test_init_creates_new_board_by_default(self):
-        """Verifica que se crea un tablero nuevo por defecto al no pasar argumentos."""
-        board = Board()
-        self.assertListEqual(board.__top_board_triangles__,
-                             self.default_top_board)
-        self.assertListEqual(board.__bot_board_triangles__,
-                             self.default_bot_board)
-
-    def test_init_with_one_argument_creates_new_board(self):
-        """Verifica que se crea un tablero nuevo si solo se pasa un argumento."""
-        # Caso 1: Solo se proporciona el tablero superior.
-        board_top_only = Board(top_board_triangles=[[1, 1, "X"]])
-        self.assertListEqual(board_top_only.__top_board_triangles__,
-                             self.default_top_board)
-        self.assertListEqual(board_top_only.__bot_board_triangles__,
-                             self.default_bot_board)
-
-        # Caso 2: Solo se proporciona el tablero inferior.
-        board_bot_only = Board(bot_board_triangles=[[1, 1, "Y"]])
-        self.assertListEqual(board_bot_only.__top_board_triangles__,
-                             self.default_top_board)
-        self.assertListEqual(board_bot_only.__bot_board_triangles__,
-                             self.default_bot_board)
-
-    def test_init_with_custom_board(self):
-        """Verifica que la inicialización funciona con un tablero personalizado."""
-        custom_top = [[1, 0, "A"]]
-        custom_bot = [[2, 0, "B"]]
-        board = Board(top_board_triangles=custom_top,
-                      bot_board_triangles=custom_bot)
-
-        self.assertListEqual(board.__top_board_triangles__, custom_top)
-        self.assertListEqual(board.__bot_board_triangles__, custom_bot)
-
     def test_new_game_board_resets_state(self):
         """Verifica que new_game_board() resetea el tablero a su estado inicial."""
         # Se crea un tablero personalizado.
-        custom_top = [[1, 0, "A"]]
-        custom_bot = [[2, 0, "B"]]
-        board = Board(top_board_triangles=custom_top,
-                      bot_board_triangles=custom_bot)
+        custom_triangle = [9, 0, "○"]
+        self.board.replace_triangle(1, True, custom_triangle)
 
         # Se llama al método para resetear el tablero.
-        board.new_game_board()
+        self.board.new_game_board()
 
         # Se comprueba que el tablero ha vuelto al estado por defecto.
-        self.assertListEqual(board.__top_board_triangles__,
+        self.assertListEqual(self.board.__top_board_triangles__,
                              self.default_top_board)
-        self.assertListEqual(board.__bot_board_triangles__,
+        self.assertListEqual(self.board.__bot_board_triangles__,
                              self.default_bot_board)
 
     def test_map_normal_index_for_white_checkers(self):
@@ -103,12 +66,12 @@ class TestBoard(unittest.TestCase):
         # Reemplaza un triángulo en el tablero superior (perspectiva de blancas)
         self.board.replace_triangle(1, True, new_triangle_top)
         # Índice normal 1 para blancas es el índice 11 en la lista top
-        self.assertEqual(self.board.top_board_triangles[11], new_triangle_top)
+        self.assertEqual(self.board.__top_board_triangles__[11], new_triangle_top)
 
         # Reemplaza un triángulo en el tablero inferior (perspectiva de negras)
         self.board.replace_triangle(1, False, new_triangle_bot)
         # Índice normal 1 para negras es el índice 0 en la lista bot
-        self.assertEqual(self.board.bot_board_triangles[0], new_triangle_bot)
+        self.assertEqual(self.board.__bot_board_triangles__[0], new_triangle_bot)
 
     def test_replace_multiple_triangles(self):
         """Verifica que múltiples triángulos se reemplazan correctamente en una llamada."""
@@ -124,9 +87,26 @@ class TestBoard(unittest.TestCase):
 
         self.board.replace_multiple_triangles(replacements, uses_white_checkers=True)
 
-        self.assertEqual(self.board.top_board_triangles[11], new_triangle1)
-        self.assertEqual(self.board.bot_board_triangles[0], new_triangle2)
-        self.assertEqual(self.board.top_board_triangles[0], new_triangle3)
+        self.assertEqual(self.board.__top_board_triangles__[11], new_triangle1)
+        self.assertEqual(self.board.__bot_board_triangles__[0], new_triangle2)
+        self.assertEqual(self.board.__top_board_triangles__[0], new_triangle3)
+
+    def test_verify_checker_placement(self):
+        """Verifica verify_checker_placement() en varios escenarios."""
+        # Resetea el tablero a su estado inicial antes de cada verificación
+
+        # Triángulo vacío (Se permite)
+        self.assertTrue(self.board.verify_checker_placement(2, True))
+
+        # Triángulo con fichas propias (Se permite)
+        self.assertTrue(self.board.verify_checker_placement(1, True))
+
+        # Triángulo con una sola ficha enemiga (Se permite)
+        self.board.replace_triangle(3, True, [1, 0, "○"])
+        self.assertTrue(self.board.verify_checker_placement(3, True))
+
+        # Triángulo con múltiples fichas enemigas (No se permite)
+        self.assertFalse(self.board.verify_checker_placement(8, True))
 
 
 if __name__ == '__main__':

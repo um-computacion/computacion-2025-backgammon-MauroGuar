@@ -7,6 +7,13 @@ class Player:
         __score__: El puntaje del jugador.
     """
     def __init__(self, name, uses_white_ckeckers: bool,score: int = 0):
+        """Inicializa una instancia del jugador.
+
+        Args:
+            name: El nombre del jugador.
+            uses_white_ckeckers: Indica si el jugador usa fichas blancas (
+            score: El puntaje inicial del jugador (por defecto es 0).
+        """
         self.__name__ = name
         self.__uses_white_checkers__ = uses_white_ckeckers
         self.__score__ = score
