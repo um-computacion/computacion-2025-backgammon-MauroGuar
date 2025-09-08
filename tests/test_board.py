@@ -108,6 +108,30 @@ class TestBoard(unittest.TestCase):
         # Triángulo con múltiples fichas enemigas (No se permite)
         self.assertFalse(self.board.verify_checker_placement(8, True))
 
+    def test_verify_movable_checker(self):
+        """Verifica verify_movable_checker() en varios escenarios."""
+        # Se colocan triángulos personalizados con una ficha para ambos jugadores
+        custom_triangle_white = [1, 0, "●"]
+        custom_triangle_black = [1, 0, "○"]
+        self.board.replace_triangle(2, True, custom_triangle_white)
+        self.board.replace_triangle(2, False, custom_triangle_black)
+
+        # Jugador con fichas blancas
+        # Triángulo con al menos una ficha propia (Se permite mover)
+        self.assertTrue(self.board.verify_movable_checker(1, True))
+        # Triángulo con exactamente una ficha propia (Se permite mover)
+        self.assertTrue(self.board.verify_movable_checker(2, True))
+        # Triángulo sin fichas propias (No se permite mover)
+        self.assertFalse(self.board.verify_movable_checker(3, True))
+        # Triángulo con fichas enemigas (No se permite mover)
+        self.assertFalse(self.board.verify_movable_checker(13, True))
+
+        # Mismo conjunto de pruebas para el jugador con fichas negras
+        self.assertTrue(self.board.verify_movable_checker(1, False))
+        self.assertTrue(self.board.verify_movable_checker(2, False))
+        self.assertFalse(self.board.verify_movable_checker(3, False))
+        self.assertFalse(self.board.verify_movable_checker(13, False))
+
 
 if __name__ == '__main__':
     unittest.main()
