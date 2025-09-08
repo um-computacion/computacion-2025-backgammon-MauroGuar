@@ -124,3 +124,26 @@ class Board:
 
         # Si ninguna de las condiciones anteriores se cumple, no se puede colocar la ficha
         return False
+
+    def verify_movable_checker(self, normal_index: int, uses_white_checkers: bool) -> bool:
+        """Verifica si una ficha en un triángulo específico puede ser movida.
+
+        Args:
+            normal_index: El índice normal (1-24).
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+        Returns:
+            True si la ficha puede ser movida, False en caso contrario.
+        """
+        # Mapea el índice normal al índice de la lista correspondiente
+        is_top, index = self.map_normal_index(normal_index, uses_white_checkers)
+        if is_top:
+            verify_triangle = self.__top_board_triangles__[index]
+        else:
+            verify_triangle = self.__bot_board_triangles__[index]
+
+        # Si el triángulo tiene fichas del mismo color, se puede mover la ficha
+        if verify_triangle[0] > 0 and ((uses_white_checkers and verify_triangle[2] == "●") or (
+                                        not uses_white_checkers and verify_triangle[2] == "○")):
+            return True
+        # En caso contrario, no se puede mover la ficha
+        return False
