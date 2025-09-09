@@ -132,6 +132,69 @@ class TestBoard(unittest.TestCase):
         self.assertFalse(self.board.verify_movable_checker(3, False))
         self.assertFalse(self.board.verify_movable_checker(13, False))
 
+    def test_move_checker_same_color(self):
+        """Verifica que move_checker() mueve una ficha correctamente.
+        Mueve de un lugar con fichas a otro con fichas (ambos del mismo color)
+        """
+        # Se colocan triángulos personalizados con una ficha para ambos jugadores
+        custom_triangle_white = [1, 0, "●"]
+        custom_triangle_black = [1, 0, "○"]
+        self.board.replace_triangle(2, True, custom_triangle_white)
+        self.board.replace_triangle(2, False, custom_triangle_black)
+
+        # Mueve una ficha blanca del triángulo 1 (2 blancas) al triángulo 2 (1 blancas)
+        self.board.move_checker(1, 2, True)
+        self.assertEqual(self.board.__top_board_triangles__[11], [1, 0, "●"])
+        self.assertEqual(self.board.__top_board_triangles__[10], [2, 0, "●"])
+
+        # Mueve una ficha negra del triángulo 1 (5 negras) al triángulo 2 (1 negras)
+        self.board.move_checker(1, 2, False)
+        self.assertEqual(self.board.__bot_board_triangles__[0], [4, 0, "○"])
+        self.assertEqual(self.board.__bot_board_triangles__[1], [2, 0, "○"])
+
+    def test_move_checker_empty_triangle(self):
+        """Verifica que move_checker() mueve una ficha correctamente.
+        Mueve de un lugar con fichas a otro vacío.
+        """
+        # Mueve una ficha blanca del triángulo 1 (2 blancas) al triángulo 2 (vacío)
+        self.board.move_checker(1, 2, True)
+        self.assertEqual(self.board.__top_board_triangles__[11], [1, 0, "●"])
+        self.assertEqual(self.board.__top_board_triangles__[10], [1, 0, "●"])
+
+        # Mueve una ficha negra del triángulo 1 (5 negras) al triángulo 2 (vacío)
+        self.board.move_checker(1, 2, False)
+        self.assertEqual(self.board.__bot_board_triangles__[0], [4, 0, "○"])
+        self.assertEqual(self.board.__bot_board_triangles__[1], [1, 0, "○"])
+
+    def test_move_checker_capture(self):
+        """Verifica que move_checker() mueve una ficha correctamente.
+        Mueve de un lugar con fichas a otro con una ficha enemiga (captura).
+        """
+        # Se colocan triángulos personalizados con una ficha para ambos jugadores
+        custom_triangle_white = [1, 0, "●"]
+        custom_triangle_black = [1, 0, "○"]
+        self.board.replace_triangle(2, True, custom_triangle_black)
+        self.board.replace_triangle(2, False, custom_triangle_white)
+
+        # Mueve una ficha blanca del triángulo 1 (2 blancas) al triángulo 2 (1 negra)
+        move_result = self.board.move_checker(1, 2, True)
+        self.assertEqual(self.board.__top_board_triangles__[11], [1, 0, "●"])
+        self.assertEqual(self.board.__top_board_triangles__[10], [1, 0, "●"])
+        # Verifica que se devolvió True al comer la ficha enemiga
+        self.assertTrue(move_result)
+        # Verifica que la ficha negra ha sido capturada y movida a la barra
+        self.assertEqual(self.board.__bar__[1], 1)
+
+        # Mueve una ficha negra del triángulo 1 (5 negras) al triángulo 2 (1 blanca)
+        move_result = self.board.move_checker(1, 2, False)
+        self.assertEqual(self.board.__bot_board_triangles__[0], [4, 0, "○"])
+        self.assertEqual(self.board.__bot_board_triangles__[1], [1, 0, "○"])
+        # Verifica que se devolvió True al comer la ficha enemiga
+        self.assertTrue(move_result)
+        # Verifica que la ficha blanca ha sido capturada y movida a la barra
+        self.assertEqual(self.board.__bar__[0], 1)
+
+
 
 if __name__ == '__main__':
     unittest.main()
