@@ -62,16 +62,16 @@ class Board:
         if uses_white_checkers:
             if 1 <= normal_index <= 12:
                 return True, 12 - normal_index
-            elif 13 <= normal_index <= 24:
-                return False, 24 - normal_index
+            if 13 <= normal_index <= 24:
+                return False, normal_index - 13
 
         # Si el jugador usa fichas negras, los triángulos 1-12
         # están en la parte inferior y los triángulos 13-24
         # están en la parte superior.
         else:
             if 1 <= normal_index <= 12:
-                return False, normal_index - 1
-            elif 13 <= normal_index <= 24:
+                return False, 12 - normal_index
+            if 13 <= normal_index <= 24:
                 return True, normal_index - 13
 
     def replace_triangle(self, normal_index: int, uses_white_checkers: bool, new_triangle: list):
