@@ -34,6 +34,16 @@ class Board:
         self.__bar__ = []
         self.new_game_board()
 
+    @property
+    def top_board_triangles(self) -> list:
+        """Obtiene los triángulos superiores del tablero."""
+        return self.__top_board_triangles__
+
+    @property
+    def bot_board_triangles(self) -> list:
+        """Obtiene los triángulos inferiores del tablero."""
+        return self.__bot_board_triangles__
+
     def new_game_board(self):
         """Resetea el tablero de juego a un estado inicial por defecto."""
         self.__top_board_triangles__ = [[5, 0, "●"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [3, 0, "○"], [0, 0, " "],

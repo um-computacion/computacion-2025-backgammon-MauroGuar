@@ -26,20 +26,20 @@ class CLI:
         """
         self.__board__ = board
 
-    def print_board(self, white_player: bool):
+    def print_board(self, uses_white_checkers: bool):
         """Imprime el tablero del juego en la consola.
 
         Args:
-            white_player: Un booleano que indica si el jugador actual es o no el jugador de fichas blancas.
+            uses_white_checkers: Indica si el jugador actual usa fichas blancas.
         """
         board_top_triangles = self.__board__.top_board_triangles
         board_bot_triangles = self.__board__.bot_board_triangles
-        if not white_player:
+        if not uses_white_checkers:
             tmp_top_triangles = board_top_triangles.copy()
             board_top_triangles = list(reversed(board_bot_triangles))
             board_bot_triangles = list(reversed(tmp_top_triangles))
-        print(self.generate_top_board_str(board_top_triangles), end="")
-        print(self.generate_bottom_board_str(board_bot_triangles), end="")
+        print(self.generate_top_board_str(board_top_triangles, uses_white_checkers), end="")
+        print(self.generate_bottom_board_str(board_bot_triangles, uses_white_checkers), end="")
     
     def character_to_put_top(self, line_number: int, triangle: list) -> str:
         """Determina el carácter a colocar
@@ -74,21 +74,30 @@ class CLI:
         # Si no se debe colocar ningún carácter, se devuelve un espacio en blanco.
         return " "
 
-    def generate_top_board_str(self, top_board_triangles: list) -> str:
+    def generate_top_board_str(self, top_board_triangles: list, uses_white_checkers: bool) -> str:
         """Genera la representación en cadena del tablero superior.
 
         Args:
             top_board_triangles: La lista con los triángulos de la parte superior.
+            uses_white_checkers: Indica si el jugador actual usa fichas blancas.
         Returns:
             Una cadena que representa el tablero superior.
         """
         # Encabezado del tablero superior.
-        top_board_str = (
-            "  ───────────────────────────────────────\n"
-            "   c  b  a  9  8  7     6  5  4  3  2  1\n"
-            "┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐\n"
-            "│  ▼  ▼  ▼  ▼  ▼  ▼  │  ▼  ▼  ▼  ▼  ▼  ▼  │\n"
-        )
+        if uses_white_checkers:
+            top_board_str = (
+                "  ───────────────────────────────────────\n"
+                "   c  b  a  9  8  7     6  5  4  3  2  1\n"
+                "┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐\n"
+                "│  ▼  ▼  ▼  ▼  ▼  ▼  │  ▼  ▼  ▼  ▼  ▼  ▼  │\n"
+            )
+        else:
+            top_board_str = (
+                "  ───────────────────────────────────────\n"
+                "   1  2  3  4  5  6     7  8  9  a  b  c\n"
+                "┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐\n"
+                "│  ▼  ▼  ▼  ▼  ▼  ▼  │  ▼  ▼  ▼  ▼  ▼  ▼  │\n"
+            )
 
         # Determina la altura máxima de los triángulos para saber cuántas líneas dibujar.
         max_triangle_height = max(triangle[0] + triangle[1] for triangle in top_board_triangles)
@@ -142,7 +151,7 @@ class CLI:
         return " "
 
 
-    def generate_bottom_board_str(self, bottom_board_triangles: list) -> str:
+    def generate_bottom_board_str(self, bottom_board_triangles: list, uses_white_checkers: bool) -> str:
         """Genera la representación en cadena del tablero inferior.
 
         Args:
@@ -183,11 +192,27 @@ class CLI:
         bottom_board_str += "".join(str_tmp_pile)
 
         # Agrega el pie del tablero inferior.
-        bottom_board_str += (
-            "│  ▲  ▲  ▲  ▲  ▲  ▲  │  ▲  ▲  ▲  ▲  ▲  ▲  │\n"
-            "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
-            "   d  e  f  g  h  i     j  k  l  m  n  ñ   \n"
-            "  ───────────────────────────────────────\n"
-        )
+        if uses_white_checkers:
+            bottom_board_str += (
+                "│  ▲  ▲  ▲  ▲  ▲  ▲  │  ▲  ▲  ▲  ▲  ▲  ▲  │\n"
+                "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
+                "   d  e  f  g  h  i     j  k  l  m  n  o   \n"
+                "  ───────────────────────────────────────\n"
+            )
+        else:
+            bottom_board_str += (
+                "│  ▲  ▲  ▲  ▲  ▲  ▲  │  ▲  ▲  ▲  ▲  ▲  ▲  │\n"
+                "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
+                "   o  n  m  l  k  j     i  h  g  f  e  d   \n"
+                "  ───────────────────────────────────────\n"
+            )
 
         return bottom_board_str
+
+
+if __name__ == "__main__":
+    board = Board()
+    cli = CLI(board)
+    cli.print_board(True)
+    print("\n")
+    cli.print_board(False)
