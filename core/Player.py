@@ -2,26 +2,26 @@ class Player:
     """Representa a un jugador en el juego.
 
     Attributes:
-        __name__: El nombre del jugador.
+        __player_name__: El nombre del jugador.
         __uses_white_checkers__: Indica si el jugador usa fichas blancas (True) o negras (False).
         __score__: El puntaje del jugador.
     """
-    def __init__(self, name, uses_white_ckeckers: bool,score: int = 0):
+    def __init__(self, player_name, uses_white_ckeckers: bool, score: int = 0):
         """Inicializa una instancia del jugador.
 
         Args:
-            name: El nombre del jugador.
+            player_name: El nombre del jugador.
             uses_white_ckeckers: Indica si el jugador usa fichas blancas (
             score: El puntaje inicial del jugador (por defecto es 0).
         """
-        self.__name__ = name
+        self.__player_name__ = player_name
         self.__uses_white_checkers__ = uses_white_ckeckers
         self.__score__ = score
 
     @property
     def name(self) -> str:
         """El nombre del jugador."""
-        return self.__name__
+        return self.__player_name__
 
     @property
     def uses_white_checkers(self) -> bool:
