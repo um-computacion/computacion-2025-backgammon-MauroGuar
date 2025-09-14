@@ -13,7 +13,7 @@ class CLI:
         POSIBLE_CHECKER_TOP_STR: Tupla de carácteres para simbolizar un posible movimiento (en top).
         POSIBLE_CHECKER_BOT_STR: Tupla de carácteres para simbolizar un posible movimiento (en bot).
     """
-    SELECTED_CHECKER_TOP_STR= "▲"
+    SELECTED_CHECKER_TOP_STR = "▲"
     SELECTED_CHECKER_BOT_STR = "▼"
     POSIBLE_CHECKER_TOP_STR = ("⊕", "△")
     POSIBLE_CHECKER_BOT_STR = ("⊕", "▽")
@@ -40,7 +40,7 @@ class CLI:
             board_bot_triangles = list(reversed(tmp_top_triangles))
         print(self.generate_top_board_str(board_top_triangles, uses_white_checkers), end="")
         print(self.generate_bottom_board_str(board_bot_triangles, uses_white_checkers), end="")
-    
+
     def character_to_put_top(self, line_number: int, triangle: list) -> str:
         """Determina el carácter a colocar
         (ficha/espacio en blanco/símbolo de selección)
@@ -129,7 +129,6 @@ class CLI:
 
         return top_board_str
 
-
     def character_to_put_bottom(self, line_number: int, triangle: list) -> str:
         """Determina el carácter a colocar
         (ficha/espacio en blanco/símbolo de selección)
@@ -149,7 +148,6 @@ class CLI:
             if triangle[1] == 2 and 2 >= line_number - triangle[0] >= 1:
                 return self.POSIBLE_CHECKER_BOT_STR[line_number - triangle[0] - 1]
         return " "
-
 
     def generate_bottom_board_str(self, bottom_board_triangles: list, uses_white_checkers: bool) -> str:
         """Genera la representación en cadena del tablero inferior.
@@ -209,10 +207,19 @@ class CLI:
 
         return bottom_board_str
 
+    @staticmethod
+    def translate_user_input_select(user_input: str) -> int:
+        """Traduce la entrada del usuario para seleccionar un triángulo.
 
-if __name__ == "__main__":
-    board = Board()
-    cli = CLI(board)
-    cli.print_board(True)
-    print("\n")
-    cli.print_board(False)
+        Args:
+            user_input: La entrada del usuario como cadena.
+        Returns:
+            El índice del triángulo seleccionado (1-24) o -1 si la entrada es inválida.
+        """
+        # Carácteres permitidos para seleccionar triángulos.
+        allowed_inputs = tuple("123456789abcdefghijklmno")
+
+        # Verifica si la entrada del usuario es válida.
+        if user_input.lower() in allowed_inputs and len(user_input) == 1:
+            return allowed_inputs.index(user_input.lower()) + 1
+        return -1

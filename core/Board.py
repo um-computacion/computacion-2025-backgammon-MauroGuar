@@ -36,12 +36,12 @@ class Board:
 
     @property
     def top_board_triangles(self) -> list:
-        """Obtiene los triángulos superiores del tablero."""
+        """Triángulos superiores del tablero."""
         return self.__top_board_triangles__
 
     @property
     def bot_board_triangles(self) -> list:
-        """Obtiene los triángulos inferiores del tablero."""
+        """Triángulos inferiores del tablero."""
         return self.__bot_board_triangles__
 
     def new_game_board(self):
