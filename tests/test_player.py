@@ -7,28 +7,28 @@ class TestPlayer(unittest.TestCase):
 
     def test_init_with_required_arguments(self):
         """Verifica la inicialización con argumentos requeridos y score por defecto."""
-        player = Player(name="Pablo", uses_white_ckeckers=True)
+        player = Player(player_name="Pablo", uses_white_ckeckers=True)
         self.assertEqual(player.name, "Pablo")
         self.assertTrue(player.uses_white_checkers)
         self.assertEqual(player.score, 0)
 
     def test_init_with_specific_score(self):
         """Verifica la inicialización con un puntaje inicial específico."""
-        player = Player(name="Juan", uses_white_ckeckers=False, score=10)
+        player = Player(player_name="Juan", uses_white_ckeckers=False, score=10)
         self.assertEqual(player.name, "Juan")
         self.assertFalse(player.uses_white_checkers)
         self.assertEqual(player.score, 10)
 
     def test_properties_return_correct_values(self):
         """Verifica que las propiedades devuelven los valores correctos."""
-        player = Player(name="TestPlayer", uses_white_ckeckers=True, score=5)
+        player = Player(player_name="TestPlayer", uses_white_ckeckers=True, score=5)
         self.assertEqual(player.name, "TestPlayer")
         self.assertTrue(player.uses_white_checkers)
         self.assertEqual(player.score, 5)
 
     def test_reset_score(self):
         """Verifica que el método reset_score reinicia el puntaje a 0."""
-        player = Player(name="Player1", uses_white_ckeckers=True, score=100)
+        player = Player(player_name="Player1", uses_white_ckeckers=True, score=100)
         self.assertEqual(player.score, 100)
 
         player.reset_score()
@@ -36,7 +36,7 @@ class TestPlayer(unittest.TestCase):
 
     def test_properties_are_read_only(self):
         """Verifica que las propiedades de la clase son de solo lectura."""
-        player = Player(name="Player1", uses_white_ckeckers=True)
+        player = Player(player_name="Player1", uses_white_ckeckers=True)
         with self.assertRaises(AttributeError):
             player.name = "NewName"
         with self.assertRaises(AttributeError):

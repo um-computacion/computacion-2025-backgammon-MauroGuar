@@ -4,6 +4,7 @@ from core.Board import Board
 
 class TestBoard(unittest.TestCase):
     """Conjunto de pruebas para la clase Board."""
+
     def setUp(self):
         """Prepara los recursos necesarios para cada prueba.
 
@@ -156,11 +157,13 @@ class TestBoard(unittest.TestCase):
         """Verifica que move_checker() mueve una ficha correctamente.
         Mueve de un lugar con fichas a otro vacío.
         """
+        # --- Pruebas para el jugador con fichas blancas ---
         # Mueve una ficha blanca del triángulo 1 (2 blancas) al triángulo 2 (vacío)
         self.board.move_checker(1, 2, True)
         self.assertEqual(self.board.__top_board_triangles__[11], [1, 0, "●"])
         self.assertEqual(self.board.__top_board_triangles__[10], [1, 0, "●"])
 
+        # --- Pruebas para el jugador con fichas negras ---
         # Mueve una ficha negra del triángulo 1 (5 negras) al triángulo 2 (vacío)
         self.board.move_checker(1, 2, False)
         self.assertEqual(self.board.__bot_board_triangles__[0], [4, 0, "○"])
@@ -176,6 +179,7 @@ class TestBoard(unittest.TestCase):
         self.board.replace_triangle(2, True, custom_triangle_black)
         self.board.replace_triangle(2, False, custom_triangle_white)
 
+        # --- Pruebas para el jugador con fichas blancas ---
         # Mueve una ficha blanca del triángulo 1 (2 blancas) al triángulo 2 (1 negra)
         move_result = self.board.move_checker(1, 2, True)
         self.assertEqual(self.board.__top_board_triangles__[11], [1, 0, "●"])
@@ -185,6 +189,7 @@ class TestBoard(unittest.TestCase):
         # Verifica que la ficha negra ha sido capturada y movida a la barra
         self.assertEqual(self.board.__bar__[1], 1)
 
+        # --- Pruebas para el jugador con fichas negras ---
         # Mueve una ficha negra del triángulo 1 (5 negras) al triángulo 2 (1 blanca)
         move_result = self.board.move_checker(1, 2, False)
         self.assertEqual(self.board.__bot_board_triangles__[0], [4, 0, "○"])
@@ -194,6 +199,50 @@ class TestBoard(unittest.TestCase):
         # Verifica que la ficha blanca ha sido capturada y movida a la barra
         self.assertEqual(self.board.__bar__[0], 1)
 
+    def test_get_possible_sums_tuple(self):
+        test_tuples = ((1, 2), (3, 4), (5, 6), (2, 2), (3, 3, 3), (6, 6, 6, 6))
+        expected_tuples = ((1, 2, 3), (3, 4, 7), (5, 6, 11), (2, 4), (3, 6, 9), (6, 12, 18, 24))
+        for i, test in enumerate(test_tuples):
+            with self.subTest(i=i):
+                self.assertEqual(self.board.get_possible_sums_tuple(test), expected_tuples[i])
+
+    def test_get_possible_moves_white_and_black(self):
+        """Verifica get_possible_moves() para ambos jugadores en varios escenarios."""
+        # Se colocan triángulos personalizados con una ficha para ambos jugadores
+        custom_triangle_white = [1, 0, "●"]
+        custom_triangle_black = [1, 0, "○"]
+        self.board.replace_triangle(2, True, custom_triangle_black)
+        self.board.replace_triangle(2, False, custom_triangle_white)
+
+        # --- Pruebas para el jugador con fichas blancas ---
+        # Triángulo con al menos una ficha propia y
+        # objetivo vacío (Se permite mover)
+        self.assertTupleEqual(self.board.get_possible_moves(1, True, (2,)), (3,))
+        # Triángulo con al menos una ficha propia y
+        # objetivo con una ficha enemiga (Se permite mover)
+        self.assertTupleEqual(self.board.get_possible_moves(1, True, (1,)), (2,))
+        # Dos dados. Triángulo con al menos una ficha propia
+        # y objetivo con múltiples fichas enemiga (No se permite mover)
+        self.assertTupleEqual(self.board.get_possible_moves(1, True, (1, 4)), (2, 5))
+        # Movimiento fuera de límites (devuelve 25) # TODO Idear mejor esto
+        self.assertTupleEqual(self.board.get_possible_moves(24, True, (1,)), (25,))
+        # Movimiento con dados dobles
+        self.assertTupleEqual(self.board.get_possible_moves(1, True, (2, 2, 2, 2)), (3, 5, 7, 9))
+
+        # --- Pruebas para el jugador con fichas negras ---
+        # Triángulo con al menos una ficha propia y
+        # objetivo vacío (Se permite mover)
+        self.assertTupleEqual(self.board.get_possible_moves(1, False, (2,)), (3,))
+        # Triángulo con al menos una ficha propia y
+        # objetivo con una ficha enemiga (Se permite mover)
+        self.assertTupleEqual(self.board.get_possible_moves(1, False, (1,)), (2,))
+        # Dos dados. Triángulo con al menos una ficha propia y
+        # objetivo con múltiples fichas enemigas (No se permite mover)
+        self.assertTupleEqual(self.board.get_possible_moves(1, False, (1, 4)), (2, 6))
+        # Movimiento fuera de límites (devuelve 25)
+        self.assertTupleEqual(self.board.get_possible_moves(24, False, (1,)), (25, ))
+        # Movimiento con dados dobles
+        self.assertTupleEqual(self.board.get_possible_moves(1, False, (2, 2, 2, 2)), (3, 9))
 
 
 if __name__ == '__main__':

@@ -1,3 +1,6 @@
+from itertools import combinations
+
+
 class Board:
     """Representa un tablero de juego.
 
@@ -211,3 +214,59 @@ class Board:
         self.replace_multiple_triangles([(normal_origin, origin_triangle), (normal_dest, dest_triangle)],
                                         uses_white_checkers)
         return eaten_checker
+
+    @staticmethod
+    def get_possible_sums_tuple(numbers: tuple[int, ...]) -> tuple[int, ...]:
+        """Calcula todas las sumas posibles de
+        combinaciones de números positivos en una tupla.
+        Sin repeticiones y ordenadas de menor a mayor.
+
+        Args:
+            numbers: Una tupla de números enteros.
+        Returns:
+            Una tupla ordenada de todas las sumas posibles de combinaciones.
+        """
+        # Filtra solo los números positivos
+        positive_numbers = [num for num in numbers if num > 0]
+
+        # Hace un set para evitar sumas repetidas
+        possible_sums = set()
+
+        # Calcula todas las combinaciones posibles
+        for i in range(1, len(positive_numbers) + 1):
+            for combo in combinations(positive_numbers, i):
+                possible_sums.add(sum(combo))
+
+        # Retorna una tupla ordenada de las sumas posibles
+        return tuple(sorted(list(possible_sums)))
+
+    def get_possible_moves(self, selected_checker_normal: int,
+                           uses_white_checkers: bool, dice_numbers: tuple[int, ...]) -> tuple[int, ...]:
+        """Calcula y devuelve todos los movimientos posibles para una ficha seleccionada.
+
+        Args:
+            selected_checker_normal: El índice normal (1-24) de la ficha seleccionada.
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+            dice_numbers: Una tupla de números representando los dados lanzados.
+        Returns:
+            Una tupla de índices normales (1-24) a los que la ficha puede moverse.
+            Incluye 25 si la ficha puede ser retirada.
+        """
+        movements_possible = []
+        # Obtiene todas las sumas posibles de los números de los dados
+        movements_to_check = self.get_possible_sums_tuple(dice_numbers)
+
+        # Verifica cada movimiento posible
+        for move in movements_to_check:
+            objective_triangle_normal = selected_checker_normal + move
+            # Si el movimiento está dentro del rango del tablero lo verifica
+            if objective_triangle_normal <= 24:
+                if self.verify_checker_placement(objective_triangle_normal, uses_white_checkers):
+                    movements_possible.append(objective_triangle_normal)
+            # Si el movimiento excede el rango del tablero,
+            # significa que la ficha puede ser retirada
+            elif objective_triangle_normal == 25:
+                movements_possible.append(25)
+
+        # Retorna una tupla de movimientos posibles
+        return tuple(movements_possible)
