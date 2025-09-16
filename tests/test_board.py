@@ -18,6 +18,10 @@ class TestBoard(unittest.TestCase):
         self.default_bot_board = [[5, 0, "○"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [3, 0, "●"], [0, 0, " "],
                                   [5, 0, "●"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [0, 0, " "], [2, 0, "○"]]
 
+        self.default_board_bar = [0, 0]  # [white_checkers_on_bar, black_checkers_on_bar]
+
+        self.default_is_bar_empty = [True, True]  # [is_white_bar_empty, is_black_bar_empty]
+
         # Crea una instancia de Board para ser usada en las pruebas
         self.board = Board()
 
@@ -26,6 +30,8 @@ class TestBoard(unittest.TestCase):
         # Se crea un tablero personalizado.
         custom_triangle = [9, 0, "○"]
         self.board.replace_triangle(1, True, custom_triangle)
+        self.board.__board_bar__ = [2, 3]
+        self.board.__is_bar_empty__ = [False, False]
 
         # Se llama al método para resetear el tablero.
         self.board.new_game_board()
@@ -35,6 +41,10 @@ class TestBoard(unittest.TestCase):
                              self.default_top_board)
         self.assertListEqual(self.board.__bot_board_triangles__,
                              self.default_bot_board)
+        self.assertListEqual(self.board.__board_bar__,
+                             self.default_board_bar)
+        self.assertListEqual(self.board.__is_bar_empty__,
+                             self.default_is_bar_empty)
 
     def test_map_normal_index_for_white_checkers(self):
         """Verifica el mapeo de índices para el jugador con fichas blancas."""
@@ -188,7 +198,7 @@ class TestBoard(unittest.TestCase):
         # Verifica que se devolvió True al comer la ficha enemiga
         self.assertTrue(move_result)
         # Verifica que la ficha negra ha sido capturada y movida a la barra
-        self.assertEqual(self.board.__bar__[1], 1)
+        self.assertEqual(self.board.__board_bar__[1], 1)
 
         # --- Pruebas para el jugador con fichas negras ---
         # Mueve una ficha negra del triángulo 1 (2 negras) al triángulo 2 (1 blanca)
@@ -198,7 +208,7 @@ class TestBoard(unittest.TestCase):
         # Verifica que se devolvió True al comer la ficha enemiga
         self.assertTrue(move_result)
         # Verifica que la ficha blanca ha sido capturada y movida a la barra
-        self.assertEqual(self.board.__bar__[0], 1)
+        self.assertEqual(self.board.__board_bar__[0], 1)
 
     def test_get_possible_sums_tuple(self):
         test_tuples = ((1, 2), (3, 4), (5, 6), (2, 2), (3, 3, 3), (6, 6, 6, 6))
