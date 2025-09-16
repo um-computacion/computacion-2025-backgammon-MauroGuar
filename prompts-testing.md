@@ -439,3 +439,105 @@ if __name__ == '__main__':
 ### Uso de Respuesta
 
 Utilizé el código sin cambiarlo.
+
+## Prompt #5
+
+### Modelo: Grok Code Fast 1 (A través de github copilot con openrouter)
+
+### Prompt
+
+Make the unittests for the add_checker_to_bar and remove_checker_from_bar mehods of the Board class in Board.py
+
+### Referencias
+
+- Board.py (en el contexto del workspace)
+- test_board.py (en el contexto del workspace)
+
+### Respuesta
+
+### Unit Tests for `add_checker_to_bar` and `remove_checker_from_bar`
+
+These unit tests use Python's `unittest` framework to verify the behavior of the `add_checker_to_bar` and `remove_checker_from_bar` methods in the `Board` class. The tests cover adding checkers to an empty bar, adding multiple times, removing until empty, and attempting to remove from an empty bar (which should not decrement below zero). They access the private attributes `__board_bar__` and `__is_bar_empty__` directly for verification, as no public properties are provided.
+
+```python
+import unittest
+from core.Board import Board
+
+class TestBoard(unittest.TestCase):
+    def setUp(self):
+        self.board = Board()
+
+    def test_add_checker_to_bar_white(self):
+        # Test adding white checker to empty bar
+        self.assertEqual(self.board._Board__board_bar__[0], 0)
+        self.assertTrue(self.board._Board__is_bar_empty__[0])
+        self.board.add_checker_to_bar(True)  # White
+        self.assertEqual(self.board._Board__board_bar__[0], 1)
+        self.assertFalse(self.board._Board__is_bar_empty__[0])
+
+    def test_add_checker_to_bar_black(self):
+        # Test adding black checker to empty bar
+        self.assertEqual(self.board._Board__board_bar__[1], 0)
+        self.assertTrue(self.board._Board__is_bar_empty__[1])
+        self.board.add_checker_to_bar(False)  # Black
+        self.assertEqual(self.board._Board__board_bar__[1], 1)
+        self.assertFalse(self.board._Board__is_bar_empty__[1])
+
+    def test_add_multiple_checkers_to_bar(self):
+        # Test adding multiple checkers
+        self.board.add_checker_to_bar(True)
+        self.board.add_checker_to_bar(True)
+        self.assertEqual(self.board._Board__board_bar__[0], 2)
+        self.board.add_checker_to_bar(False)
+        self.board.add_checker_to_bar(False)
+        self.board.add_checker_to_bar(False)
+        self.assertEqual(self.board._Board__board_bar__[1], 3)
+
+    def test_remove_checker_from_bar_white(self):
+        # Test removing white checker
+        self.board.add_checker_to_bar(True)
+        self.board.add_checker_to_bar(True)
+        self.board.remove_checker_from_bar(True)
+        self.assertEqual(self.board._Board__board_bar__[0], 1)
+        self.assertFalse(self.board._Board__is_bar_empty__[0])
+        self.board.remove_checker_from_bar(True)
+        self.assertEqual(self.board._Board__board_bar__[0], 0)
+        self.assertTrue(self.board._Board__is_bar_empty__[0])
+
+    def test_remove_checker_from_bar_black(self):
+        # Test removing black checker
+        self.board.add_checker_to_bar(False)
+        self.board.add_checker_to_bar(False)
+        self.board.remove_checker_from_bar(False)
+        self.assertEqual(self.board._Board__board_bar__[1], 1)
+        self.assertFalse(self.board._Board__is_bar_empty__[1])
+        self.board.remove_checker_from_bar(False)
+        self.assertEqual(self.board._Board__board_bar__[1], 0)
+        self.assertTrue(self.board._Board__is_bar_empty__[1])
+
+    def test_remove_from_empty_bar_white(self):
+        # Test removing from empty white bar (should not change)
+        self.assertEqual(self.board._Board__board_bar__[0], 0)
+        self.assertTrue(self.board._Board__is_bar_empty__[0])
+        self.board.remove_checker_from_bar(True)
+        self.assertEqual(self.board._Board__board_bar__[0], 0)
+        self.assertTrue(self.board._Board__is_bar_empty__[0])
+
+    def test_remove_from_empty_bar_black(self):
+        # Test removing from empty black bar (should not change)
+        self.assertEqual(self.board._Board__board_bar__[1], 0)
+        self.assertTrue(self.board._Board__is_bar_empty__[1])
+        self.board.remove_checker_from_bar(False)
+        self.assertEqual(self.board._Board__board_bar__[1], 0)
+        self.assertTrue(self.board._Board__is_bar_empty__[1])
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+### Uso de Respuesta
+
+Cambié lo siguiente:
+- Me dio el código para el archivo entero, yo solo quería los métodos particulares de los tests. Extraje solo ello.
+- Entendió mal como funcionaba el uses_white_checkers al añadir una ficha a la barra. Lo arreglé.
+- No usó docstrings. Remplacé los comentarios por docstrings.
