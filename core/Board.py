@@ -23,7 +23,9 @@ class Board:
     Attributes:
         __top_board_triangles__: Una lista que contiene los triángulos superiores.
         __bot_board_triangles__: Una lista que contiene los triángulos inferiores.
-        __bar__: Una lista que contiene la cantidad de fichas en la barra.
+        __board_bar__: Una lista que contiene la cantidad de fichas en la barra.
+                [fichas blancas, fichas negras]
+        __is_bar_empty__: Una lista de booleanos que indica si la barra de cada jugador está vacía.
                 [fichas blancas, fichas negras]
     """
 
@@ -31,7 +33,8 @@ class Board:
         """Inicializa una instancia de tablero de juego por defecto."""
         self.__top_board_triangles__ = []
         self.__bot_board_triangles__ = []
-        self.__bar__ = []
+        self.__board_bar__ = []
+        self.__is_bar_empty__ = []
         self.new_game_board()
 
     @property
@@ -52,7 +55,8 @@ class Board:
         self.__bot_board_triangles__ = [[5, 0, "○"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [3, 0, "●"], [0, 0, " "],
                                         [5, 0, "●"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [0, 0, " "], [2, 0, "○"]]
 
-        self.__bar__ = [0, 0]
+        self.__board_bar__ = [0, 0]
+        self.__is_bar_empty__ = [True, True]
 
     @staticmethod
     def map_normal_index(normal_index: int, uses_white_checkers: bool) -> tuple[bool, int]:
@@ -205,10 +209,10 @@ class Board:
         if dest_triangle[0] == 1 and ((uses_white_checkers and dest_triangle[2] == "○") or
                                       (not uses_white_checkers and dest_triangle[2] == "●")):
             if uses_white_checkers:
-                self.__bar__[1] += 1
+                self.add_checker_to_bar(uses_white_checkers)
                 dest_triangle = [1, 0, "●"]
             else:
-                self.__bar__[0] += 1
+                self.add_checker_to_bar(uses_white_checkers)
                 dest_triangle = [1, 0, "○"]
             eaten_checker = True
 
@@ -280,3 +284,34 @@ class Board:
 
         # Retorna una tupla de movimientos posibles
         return tuple(movements_possible)
+
+    def add_checker_to_bar(self, uses_white_checkers: bool):
+        """Agrega una ficha a la barra del tablero.
+
+        Args:
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+        """
+        if uses_white_checkers:
+            self.__board_bar__[1] += 1
+            self.__is_bar_empty__[1] = False
+        else:
+            self.__board_bar__[0] += 1
+            self.__is_bar_empty__[0] = False
+
+    def remove_checker_from_bar(self, uses_white_checkers: bool):
+        """Remueve una ficha de la barra del tablero.
+        Actualiza el estado de la barra si queda vacía.
+
+        Args:
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+        """
+        if uses_white_checkers:
+            if self.__board_bar__[0] > 0:
+                self.__board_bar__[0] -= 1
+            if self.__board_bar__[0] == 0:
+                self.__is_bar_empty__[0] = True
+        else:
+            if self.__board_bar__[1] > 0:
+                self.__board_bar__[1] -= 1
+            if self.__board_bar__[1] == 0:
+                self.__is_bar_empty__[1] = True
