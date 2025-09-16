@@ -199,6 +199,7 @@ class TestBoard(unittest.TestCase):
         self.assertTrue(move_result)
         # Verifica que la ficha negra ha sido capturada y movida a la barra
         self.assertEqual(self.board.__board_bar__[1], 1)
+        self.assertFalse(self.board.__is_bar_empty__[1])
 
         # --- Pruebas para el jugador con fichas negras ---
         # Mueve una ficha negra del triángulo 1 (2 negras) al triángulo 2 (1 blanca)
@@ -209,6 +210,7 @@ class TestBoard(unittest.TestCase):
         self.assertTrue(move_result)
         # Verifica que la ficha blanca ha sido capturada y movida a la barra
         self.assertEqual(self.board.__board_bar__[0], 1)
+        self.assertFalse(self.board.__is_bar_empty__[0])
 
     def test_get_possible_sums_tuple(self):
         test_tuples = ((1, 2), (3, 4), (5, 6), (2, 2), (3, 3, 3), (6, 6, 6, 6))
@@ -248,6 +250,70 @@ class TestBoard(unittest.TestCase):
         self.assertTupleEqual(self.board.get_possible_moves(24, False, (1,)), (25,))
         # Movimiento con dados dobles a casillas vacías
         self.assertTupleEqual(self.board.get_possible_moves(1, False, (2, 2, 2, 2)), (3, 5, 7, 9))
+
+    def test_add_checker_to_bar_white(self):
+        """Verifica add_checker_to_bar() para el jugador con fichas blancas."""
+        self.assertEqual(self.board.__board_bar__[0], 0)
+        self.assertTrue(self.board.__is_bar_empty__[0])
+        self.board.add_checker_to_bar(True)  # White
+        self.assertEqual(self.board.__board_bar__[1], 1)
+        self.assertFalse(self.board.__is_bar_empty__[1])
+
+    def test_add_checker_to_bar_black(self):
+        """Verifica add_checker_to_bar() para el jugador con fichas negras."""
+        self.assertEqual(self.board.__board_bar__[1], 0)
+        self.assertTrue(self.board.__is_bar_empty__[1])
+        self.board.add_checker_to_bar(False)  # Black
+        self.assertEqual(self.board.__board_bar__[0], 1)
+        self.assertFalse(self.board.__is_bar_empty__[0])
+
+    def test_add_multiple_checkers_to_bar(self):
+        """Verifica add_checker_to_bar() al agregar múltiples fichas a la barra."""
+        self.board.add_checker_to_bar(True)
+        self.board.add_checker_to_bar(True)
+        self.assertEqual(self.board.__board_bar__[1], 2)
+        self.board.add_checker_to_bar(False)
+        self.board.add_checker_to_bar(False)
+        self.board.add_checker_to_bar(False)
+        self.assertEqual(self.board.__board_bar__[0], 3)
+
+    def test_remove_checker_from_bar_white(self):
+        """Verifica remove_checker_from_bar() para el jugador con fichas blancas."""
+        self.board.add_checker_to_bar(False)
+        self.board.add_checker_to_bar(False)
+        self.board.remove_checker_from_bar(True)
+        self.assertEqual(self.board.__board_bar__[0], 1)
+        self.assertFalse(self.board.__is_bar_empty__[0])
+        self.board.remove_checker_from_bar(True)
+        self.assertEqual(self.board.__board_bar__[0], 0)
+        self.assertTrue(self.board.__is_bar_empty__[0])
+
+    def test_remove_checker_from_bar_black(self):
+        """Verifica remove_checker_from_bar() para el jugador con fichas negras."""
+        self.board.add_checker_to_bar(True)
+        self.board.add_checker_to_bar(True)
+        self.board.remove_checker_from_bar(False)
+        self.assertEqual(self.board.__board_bar__[1], 1)
+        self.assertFalse(self.board.__is_bar_empty__[1])
+        self.board.remove_checker_from_bar(False)
+        self.assertEqual(self.board.__board_bar__[1], 0)
+        self.assertTrue(self.board.__is_bar_empty__[1])
+
+    def test_remove_from_empty_bar_white(self):
+        """Verifica remove_checker_from_bar() al intentar remover de una barra vacía."""
+        self.assertEqual(self.board.__board_bar__[0], 0)
+        self.assertTrue(self.board.__is_bar_empty__[0])
+        self.board.remove_checker_from_bar(True)
+        self.assertEqual(self.board.__board_bar__[0], 0)
+        self.assertTrue(self.board.__is_bar_empty__[0])
+
+    def test_remove_from_empty_bar_black(self):
+        """Verifica remove_checker_from_bar() al intentar remover de una barra vacía."""
+        self.assertEqual(self.board.__board_bar__[1], 0)
+        self.assertTrue(self.board.__is_bar_empty__[1])
+        self.board.remove_checker_from_bar(False)
+        self.assertEqual(self.board.__board_bar__[1], 0)
+        self.assertTrue(self.board.__is_bar_empty__[1])
 
 
 if __name__ == '__main__':
