@@ -46,6 +46,14 @@ class Board:
     def bot_board_triangles(self) -> list:
         """Triángulos inferiores del tablero."""
         return self.__bot_board_triangles__
+    
+    @property
+    def board_bar(self) -> list:
+        """Cantidad de fichas en la barra del tablero.
+        
+        [fichas blancas, fichas negras]
+        """
+        return self.__board_bar__
 
     def new_game_board(self):
         """Resetea el tablero de juego a un estado inicial por defecto."""
