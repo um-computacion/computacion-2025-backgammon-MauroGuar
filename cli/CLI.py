@@ -51,7 +51,7 @@ class CLI:
 
     def character_to_put_top(self, line_number: int, triangle: list) -> str:
         """Determina el carácter a colocar
-        (ficha/espacio en blanco/símbolo de selección)
+        (ficha normal / espacio en blanco / símbolo de selección)
         en una línea específica de un triángulo superior.
 
         Args:
@@ -139,7 +139,7 @@ class CLI:
 
     def character_to_put_bottom(self, line_number: int, triangle: list) -> str:
         """Determina el carácter a colocar
-        (ficha/espacio en blanco/símbolo de selección)
+        (ficha normal / espacio en blanco / símbolo de selección)
         en una línea específica de un triángulo inferior.
 
         Args:
@@ -151,9 +151,9 @@ class CLI:
                 return triangle[2]
             if triangle[0] >= line_number:
                 return triangle[2]
-            if triangle[1] == 1 and line_number - triangle[0] == 1:
+            if triangle[1] == 1:
                 return self.SELECTED_CHECKER_BOT_STR
-            if triangle[1] == 2 and 2 >= line_number - triangle[0] >= 1:
+            else:
                 return self.POSIBLE_CHECKER_BOT_STR[line_number - triangle[0] - 1]
         return " "
 
