@@ -30,6 +30,7 @@ class TestBoard(unittest.TestCase):
         # Se crea un tablero personalizado.
         custom_triangle = [9, 0, "○"]
         self.board.replace_triangle(1, True, custom_triangle)
+        self.board.select_checker(1, True)
         self.board.__board_bar__ = [2, 3]
         self.board.__is_bar_empty__ = [False, False]
 
@@ -41,6 +42,7 @@ class TestBoard(unittest.TestCase):
                              self.default_top_board)
         self.assertListEqual(self.board.__bot_board_triangles__,
                              self.default_bot_board)
+        self.assertIsNone(self.board.selected_checker)
         self.assertListEqual(self.board.__board_bar__,
                              self.default_board_bar)
         self.assertListEqual(self.board.__is_bar_empty__,
@@ -314,6 +316,54 @@ class TestBoard(unittest.TestCase):
         self.board.remove_checker_from_bar(False)
         self.assertEqual(self.board.__board_bar__[1], 0)
         self.assertTrue(self.board.__is_bar_empty__[1])
+
+    def test_select_checker_valid_white_top(self):
+        """Verifica select_checker() para seleccionar una ficha blanca válida en la parte superior."""
+        # El índice 1 para blancas corresponde al triángulo superior índice 11
+        result = self.board.select_checker(1, True)
+        self.assertTrue(result)
+        self.assertEqual(self.board.selected_checker, 1)
+        self.assertEqual(self.board.__top_board_triangles__[11][1], 1)
+
+    def test_select_checker_valid_white_bot(self):
+        """Verifica select_checker() para seleccionar una ficha blanca válida en la parte inferior."""
+        # El índice 19 para blancas corresponde al triángulo inferior índice 6
+        result = self.board.select_checker(19, True)
+        self.assertTrue(result)
+        self.assertEqual(self.board.selected_checker, 19)
+        self.assertEqual(self.board.__bot_board_triangles__[6][1], 1)
+
+    def test_select_checker_valid_black_top(self):
+        """Verifica select_checker() para seleccionar una ficha negra válida en la parte superior."""
+        # El índice 19 para negras corresponde al triángulo superior índice 6
+        result = self.board.select_checker(19, False)
+        self.assertTrue(result)
+        self.assertEqual(self.board.selected_checker, 19)
+        self.assertEqual(self.board.__top_board_triangles__[6][1], 1)
+
+    def test_select_checker_valid_black_bot(self):
+        """Verifica select_checker() para seleccionar una ficha negra válida en la parte inferior."""
+        # El índice 1 para negras corresponde al triángulo inferior índice 11
+        result = self.board.select_checker(1, False)
+        self.assertTrue(result)
+        self.assertEqual(self.board.selected_checker, 1)
+        self.assertEqual(self.board.__bot_board_triangles__[11][1], 1)
+
+    def test_select_checker_empty_triangle(self):
+        """Verifica select_checker() al intentar seleccionar en un triángulo vacío."""
+        # El triángulo 2 está vacío por defecto
+        result = self.board.select_checker(2, True)
+        self.assertFalse(result)
+        # Verifica que no se haya establecido selección
+        self.assertNotEqual(self.board.selected_checker, 2)
+
+    def test_select_checker_opponent_checker(self):
+        """Verifica select_checker() al intentar seleccionar una ficha del oponente."""
+        # El triángulo 5 tiene fichas negras (○) por defecto
+        result = self.board.select_checker(5, True)  # Blancas intentando seleccionar negras
+        self.assertFalse(result)
+        # Verifica que no se haya establecido selección
+        self.assertNotEqual(self.board.selected_checker, 5)
 
 
 if __name__ == '__main__':
