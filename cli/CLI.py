@@ -51,7 +51,7 @@ class CLI:
 
     def character_to_put_top(self, line_number: int, triangle: list) -> str:
         """Determina el carácter a colocar
-        (ficha/espacio en blanco/símbolo de selección)
+        (ficha normal / espacio en blanco / símbolo de selección)
         en una línea específica de un triángulo superior.
 
         Args:
@@ -66,19 +66,13 @@ class CLI:
             # se coloca la ficha normal (o espacio en blanco).
             if triangle[0] >= line_number:
                 return triangle[2]
-            # Si no, se debe colocar un símbolo de selección.
 
-            # Si el tipo de símbolo de selección es 1 (ficha seleccionada)
-            # y la diferencia entre el número de línea actual y la cantidad de fichas normales es 1,
-            # se coloca el símbolo de ficha seleccionada.
-            if triangle[1] == 1 and line_number - triangle[0] == 1:
+            # Si no, se debe colocar un símbolo de selección.
+            if triangle[1] == 1:
                 return self.SELECTED_CHECKER_TOP_STR
-            # Si el tipo de símbolo de selección es 2 (posible movimiento)
-            # y la diferencia entre el número de línea actual y la cantidad de fichas normales
-            # está entre 1 y 2 (inclusive), se coloca el símbolo de posible movimiento
-            # correspondiente a la diferencia menos 1 (para indexar la tupla).
-            if triangle[1] == 2 and 2 >= line_number - triangle[0] >= 1:
+            else:
                 return self.POSIBLE_CHECKER_TOP_STR[line_number - triangle[0] - 1]
+
         # Si no se debe colocar ningún carácter, se devuelve un espacio en blanco.
         return " "
 
@@ -139,22 +133,28 @@ class CLI:
 
     def character_to_put_bottom(self, line_number: int, triangle: list) -> str:
         """Determina el carácter a colocar
-        (ficha/espacio en blanco/símbolo de selección)
+        (ficha normal / espacio en blanco / símbolo de selección)
         en una línea específica de un triángulo inferior.
 
         Args:
             line_number: El número de línea actual (1-indexed).
             triangle: La lista que representa el triángulo actual.
         """
+        # Si la suma de la cantidad de fichas normales y el tipo de símbolo de selección
+        # es mayor o igual al número de línea actual, entonces se debe colocar un carácter.
         if triangle[0] + triangle[1] >= line_number:
-            if triangle[1] == 0:
-                return triangle[2]
+            # Si la cantidad de fichas normales es mayor o igual al número de línea actual,
+            # se coloca la ficha normal (o espacio en blanco).
             if triangle[0] >= line_number:
                 return triangle[2]
-            if triangle[1] == 1 and line_number - triangle[0] == 1:
+
+            # Si no, se debe colocar un símbolo de selección.
+            if triangle[1] == 1:
                 return self.SELECTED_CHECKER_BOT_STR
-            if triangle[1] == 2 and 2 >= line_number - triangle[0] >= 1:
+            else:
                 return self.POSIBLE_CHECKER_BOT_STR[line_number - triangle[0] - 1]
+
+        # Si no se debe colocar ningún carácter, se devuelve un espacio en blanco.
         return " "
 
     def generate_bottom_board_str(self, bottom_board_triangles: list, uses_white_checkers: bool) -> str:
