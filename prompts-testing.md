@@ -541,3 +541,81 @@ Cambié lo siguiente:
 - Me dio el código para el archivo entero, yo solo quería los métodos particulares de los tests. Extraje solo ello.
 - Entendió mal como funcionaba el uses_white_checkers al añadir una ficha a la barra. Lo arreglé.
 - No usó docstrings. Remplacé los comentarios por docstrings.
+
+## Prompt #6
+
+### Modelo: Kilo Code (a través del sistema)
+
+### Prompt
+
+Write professional unit tests in 'tests/test_cli.py' (see below for file content) for the `generate_middle_board` method in 'cli/CLI.py' (see below for file content).
+Include at least one test case where both checkers are 0, a few other test cases where they are greater than 0, and at least one test case where both checkers are greater than zero.
+Provide professional documentation following the Google standards. Link to Google standards: 'https://github.com/google/styleguide/blob/1387bff19c141c047c483cbe813659625f93defa/pyguide.md' (see below for site content)
+The code must be in English and the documentation in Spanish.
+
+Here is the board class code in case you need it: 'core/Board.py' (see below for file content)
+
+### Referencias
+
+- tests/test_cli.py (en el contexto del workspace)
+- cli/CLI.py (en el contexto del workspace)
+- core/Board.py (en el contexto del workspace)
+- https://github.com/google/styleguide/blob/1387bff19c141c047c483cbe813659625f93defa/pyguide.md
+
+### Respuesta
+
+I added the following unit tests to the `tests/test_cli.py` file for the `generate_middle_board` method of the `CLI` class. The tests cover cases where both bars are empty, only one has ckeckers, and both have checkers, including large numbers to verify alignment. I used public methods of `Board` to modify the board's state instead of accessing private attributes.
+
+```python
+    def test_generate_middle_board_both_zero(self):
+        """Prueba que generate_middle_board devuelva la cadena correcta cuando ambas barras están vacías."""
+        # La barra ya está en [0, 0] por defecto
+        expected = ("│                    │                    │\n"
+                    "│                    │                    │\n"
+                    "│                    │                    │\n")
+        self.assertEqual(self.cli.generate_middle_board().strip(), expected.strip())
+
+    def test_generate_middle_board_white_only(self):
+        """Prueba que generate_middle_board devuelva la cadena correcta cuando solo hay fichas blancas en la barra."""
+        for _ in range(5):
+            self.board.add_checker_to_bar(False)  # Agrega fichas blancas
+        expected = ("│                    │                    │\n"
+                    "│              0 ↠ ○ │ ● ↞ 5              │\n"
+                    "│                    │                    │\n")
+        self.assertEqual(self.cli.generate_middle_board().strip(), expected.strip())
+
+    def test_generate_middle_board_black_only(self):
+        """Prueba que generate_middle_board devuelva la cadena correcta cuando solo hay fichas negras en la barra."""
+        for _ in range(7):
+            self.board.add_checker_to_bar(True)  # Agrega fichas negras
+        expected = ("│                    │                    │\n"
+                    "│              7 ↠ ○ │ ● ↞ 0              │\n"
+                    "│                    │                    │\n")
+        self.assertEqual(self.cli.generate_middle_board().strip(), expected.strip())
+
+    def test_generate_middle_board_both_non_zero(self):
+        """Prueba que generate_middle_board devuelva la cadena correcta cuando ambas barras tienen fichas."""
+        for _ in range(3):
+            self.board.add_checker_to_bar(False)  # Blancas
+        for _ in range(2):
+            self.board.add_checker_to_bar(True)   # Negras
+        expected = ("│                    │                    │\n"
+                    "│              2 ↠ ○ │ ● ↞ 3              │\n"
+                    "│                    │                    │\n")
+        self.assertEqual(self.cli.generate_middle_board().strip(), expected.strip())
+
+    def test_generate_middle_board_large_numbers(self):
+        """Prueba que generate_middle_board maneje correctamente números grandes con alineación."""
+        for _ in range(100):
+            self.board.add_checker_to_bar(False)  # Blancas
+        for _ in range(50):
+            self.board.add_checker_to_bar(True)   # Negras
+        expected = ("│                    │                    │\n"
+                    "│             50 ↠ ○ │ ● ↞ 100            │\n"
+                    "│                    │                    │\n")
+        self.assertEqual(self.cli.generate_middle_board().strip(), expected.strip())
+```
+
+### Uso de Respuesta
+
+Utilicé el código sin cambiarlo.
