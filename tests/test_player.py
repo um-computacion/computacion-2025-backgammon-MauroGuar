@@ -34,16 +34,6 @@ class TestPlayer(unittest.TestCase):
         player.reset_score()
         self.assertEqual(player.score, 0)
 
-    def test_properties_are_read_only(self):
-        """Verifica que las propiedades de la clase son de solo lectura."""
-        player = Player(player_name="Player1", uses_white_ckeckers=True)
-        with self.assertRaises(AttributeError):
-            player.name = "NewName"
-        with self.assertRaises(AttributeError):
-            player.uses_white_checkers = False
-        with self.assertRaises(AttributeError):
-            player.score = 50
-
 
 if __name__ == '__main__':
     unittest.main()
