@@ -1014,3 +1014,116 @@ The tests are in English with Spanish docstrings, following Google style guideli
 ### Uso de Respuesta
 
 Utilicé el código sin cambiarlo.
+
+## Prompt #10
+
+### Modelo: Grok Code Fast 1 mediante Kilo Code (a través del sistema)
+
+### Prompt
+
+Now I want you to write professional unit tests for the `set_player_name` method in the @/tests/test_backgammon.py file. Use the unittest standard library.
+
+First, analyze the method's implementation to identify all possible execution paths, including normal cases, edge cases, invalid inputs, and error conditions. The method validates the `name` parameter with the following checks in order:
+
+- The `name` must be a string (type `str`).
+- The length of `name` must be between 3 and 7 characters inclusive.
+- The `name` must contain only letters (a-z, A-Z), and it should set the player's name if valid, returning the set name.
+
+Design a comprehensive suite of test cases that achieve full code coverage, incorporating equivalence partitioning (e.g., valid strings, invalid types), boundary value analysis (e.g., lengths 2, 3, 7, 8), and positive/negative testing scenarios (e.g., valid names, invalid lengths, non-string inputs, non-letter characters). Include tests for both `is_white_player=True` and `False` to cover state changes.
+
+For each test case, clearly define the setup (e.g., initializing the game instance), the action (e.g., calling the method), and the assertions (verifying return values, state changes in the player attributes, and any exceptions raised with appropriate messages). Use descriptive test method names following the pattern `test_<method_name>_<scenario>`, and include fixtures or parametrization (e.g., via `unittest.TestCase.subTest` or `parameterized`) where appropriate to reduce duplication and improve maintainability.
+
+Provide professional documentation following Google standards (see @https://github.com/google/styleguide/blob/1387bff19c141c047c483cbe813659625f93defa/pyguide.md for details). The test code must be written in English, while all documentation strings (docstrings) are in Spanish. Include docstrings for test methods explaining the purpose, inputs, and expected outcomes in Spanish. Finally, add comments in the test code where necessary to explain complex logic, these ones too in Spanish.
+
+### Referencias
+
+- core/BackgammonGame.py (en el contexto del workspace)
+- tests/test_backgammon.py (en el contexto del workspace)
+- https://github.com/google/styleguide/blob/1387bff19c141c047c483cbe813659625f93defa/pyguide.md
+
+### Respuesta
+
+I added a `setUp` method to initialize a `BackgammonGame` instance for each test case, promoting code reusability and best practices. Then, I wrote comprehensive unit tests for the `set_player_name` method, covering all validation conditions, edge cases, and valid scenarios for both players. The tests include checks for invalid types, length boundaries, character restrictions, name conflicts, and successful name setting with proper case conversion. Each test method includes Spanish docstrings describing the purpose and expected outcomes, following Google style guidelines.
+
+```python
+def setUp(self):
+    """Inicializa una instancia de BackgammonGame para cada prueba."""
+    self.game = BackgammonGame()
+
+def test_set_player_name_invalid_type(self):
+    """Prueba que se lance ValueError cuando el nombre no es una cadena de texto."""
+    with self.assertRaises(ValueError) as cm:
+        self.game.set_player_name(True, 123)
+    self.assertEqual(str(cm.exception), "El nombre debe ser una cadena de texto.")
+
+def test_set_player_name_length_too_short(self):
+    """Prueba que se lance ValueError cuando el nombre tiene menos de 3 caracteres."""
+    with self.assertRaises(ValueError) as cm:
+        self.game.set_player_name(True, "AB")
+    self.assertEqual(str(cm.exception), "El nombre debe tener entre 3 y 7 caracteres.")
+
+def test_set_player_name_length_too_long(self):
+    """Prueba que se lance ValueError cuando el nombre tiene más de 7 caracteres."""
+    with self.assertRaises(ValueError) as cm:
+        self.game.set_player_name(True, "ABCDEFGH")
+    self.assertEqual(str(cm.exception), "El nombre debe tener entre 3 y 7 caracteres.")
+
+def test_set_player_name_invalid_characters(self):
+    """Prueba que se lance ValueError cuando el nombre contiene caracteres no alfanuméricos."""
+    with self.assertRaises(ValueError) as cm:
+        self.game.set_player_name(True, "ABC!")
+    self.assertEqual(str(cm.exception), "El nombre solo puede contener letras y números, y debe incluir al menos 3 letras.")
+
+def test_set_player_name_insufficient_letters(self):
+    """Prueba que se lance ValueError cuando el nombre tiene menos de 3 letras."""
+    with self.assertRaises(ValueError) as cm:
+        self.game.set_player_name(True, "123")
+    self.assertEqual(str(cm.exception), "El nombre solo puede contener letras y números, y debe incluir al menos 3 letras.")
+
+def test_set_player_name_same_as_other_case_insensitive(self):
+    """Prueba que se lance ValueError cuando el nombre es igual al del otro jugador, ignorando mayúsculas."""
+    self.game.set_player_name(True, "ALICE")  # Establecer nombre para blanco
+    with self.assertRaises(ValueError) as cm:
+        self.game.set_player_name(False, "alice")  # Intentar establecer para negro
+    self.assertEqual(str(cm.exception), "El nombre no puede ser igual al del otro jugador.")
+
+def test_set_player_name_valid_white(self):
+    """Prueba la configuración válida del nombre para el jugador blanco."""
+    result = self.game.set_player_name(True, "alice")
+    self.assertEqual(result, "ALICE")
+    self.assertEqual(self.game.white_player.name, "ALICE")
+
+def test_set_player_name_valid_black(self):
+    """Prueba la configuración válida del nombre para el jugador negro."""
+    result = self.game.set_player_name(False, "bob")
+    self.assertEqual(result, "BOB")
+    self.assertEqual(self.game.black_player.name, "BOB")
+
+def test_set_player_name_boundary_length_3(self):
+    """Prueba la configuración válida con longitud mínima de 3 caracteres."""
+    result = self.game.set_player_name(True, "ABC")
+    self.assertEqual(result, "ABC")
+    self.assertEqual(self.game.white_player.name, "ABC")
+
+def test_set_player_name_boundary_length_7(self):
+    """Prueba la configuración válida con longitud máxima de 7 caracteres."""
+    result = self.game.set_player_name(True, "ABCDEFG")
+    self.assertEqual(result, "ABCDEFG")
+    self.assertEqual(self.game.white_player.name, "ABCDEFG")
+
+def test_set_player_name_mixed_case(self):
+    """Prueba que el nombre se convierta a mayúsculas."""
+    result = self.game.set_player_name(True, "aLiCe")
+    self.assertEqual(result, "ALICE")
+    self.assertEqual(self.game.white_player.name, "ALICE")
+
+def test_set_player_name_numbers_and_letters(self):
+    """Prueba la configuración válida con letras y números."""
+    result = self.game.set_player_name(True, "ABC123")
+    self.assertEqual(result, "ABC123")
+    self.assertEqual(self.game.white_player.name, "ABC123")
+```
+
+### Uso de Respuesta
+
+Utilicé el código sin cambiarlo.
