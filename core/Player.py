@@ -23,6 +23,15 @@ class Player:
         """El nombre del jugador."""
         return self.__player_name__
 
+    @name.setter
+    def name(self, player_name: str) -> None:
+        """Redefine el nombre del jugador.
+
+        Args:
+            player_name: El nuevo nombre para el jugador.
+        """
+        self.__player_name__ = player_name
+
     @property
     def uses_white_checkers(self) -> bool:
         """Indica si el jugador usa fichas blancas (True) o negras (False)."""
