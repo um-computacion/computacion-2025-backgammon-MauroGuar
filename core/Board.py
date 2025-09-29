@@ -23,6 +23,7 @@ class Board:
     Attributes:
         __top_board_triangles__: Una lista que contiene los triángulos superiores.
         __bot_board_triangles__: Una lista que contiene los triángulos inferiores.
+        __selected_checker__: El índice normal (1-24) de la ficha seleccionada actualmente, o None si ninguna.
         __board_bar__: Una lista que contiene la cantidad de fichas en la barra.
                 [fichas blancas, fichas negras]
         __is_bar_empty__: Una lista de booleanos que indica si la barra de cada jugador está vacía.
@@ -33,6 +34,7 @@ class Board:
         """Inicializa una instancia de tablero de juego por defecto."""
         self.__top_board_triangles__ = []
         self.__bot_board_triangles__ = []
+        self.__selected_checker__ = None
         self.__board_bar__ = []
         self.__is_bar_empty__ = []
         self.new_game_board()
@@ -46,14 +48,24 @@ class Board:
     def bot_board_triangles(self) -> list:
         """Triángulos inferiores del tablero."""
         return self.__bot_board_triangles__
-    
+
+    @property
+    def selected_checker(self):
+        """Índice normal de la ficha seleccionada actualmente."""
+        return self.__selected_checker__
+
     @property
     def board_bar(self) -> list:
         """Cantidad de fichas en la barra del tablero.
-        
+
         [fichas blancas, fichas negras]
         """
         return self.__board_bar__
+
+    @property
+    def selected_checker(self) -> int | None:
+        """Índice de la ficha seleccionada actualmente."""
+        return self.__selected_checker__
 
     def new_game_board(self):
         """Resetea el tablero de juego a un estado inicial por defecto."""
@@ -62,7 +74,7 @@ class Board:
 
         self.__bot_board_triangles__ = [[5, 0, "○"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [3, 0, "●"], [0, 0, " "],
                                         [5, 0, "●"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [0, 0, " "], [2, 0, "○"]]
-
+        self.__selected_checker__ = None
         self.__board_bar__ = [0, 0]
         self.__is_bar_empty__ = [True, True]
 
@@ -271,7 +283,7 @@ class Board:
             uses_white_checkers: Indica si el jugador usa fichas blancas.
             dice_numbers: Una tupla de números representando los dados lanzados.
         Returns:
-            Una tupla de índices normales (1-24) a los que la ficha puede moverse.
+            tuple: Una tupla de índices normales (1-24) a los que la ficha puede moverse.
             Incluye 25 si la ficha puede ser retirada.
         """
         movements_possible = []
@@ -323,3 +335,35 @@ class Board:
                 self.__board_bar__[1] -= 1
             if self.__board_bar__[1] == 0:
                 self.__is_bar_empty__[1] = True
+    
+    def select_checker(self, normal_index: int, uses_white_checkers: bool) -> bool:
+        """Selecciona una ficha en un triángulo específico si es movible.
+
+        Args:
+            normal_index: El índice normal (1-24) del triángulo.
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+        Returns:
+            bool: True si la ficha fue seleccionada, False en caso contrario.
+        """
+        # Mapea el índice normal al índice de la lista correspondiente
+        is_top, index = self.map_normal_index(normal_index, uses_white_checkers)
+        if is_top:
+            selected_checker = self.__top_board_triangles__[index]
+        else:
+            selected_checker = self.__bot_board_triangles__[index]
+
+        # Si el triángulo tiene fichas del mismo color, se puede mover la ficha
+        if selected_checker[0] > 0 and ((uses_white_checkers and selected_checker[2] == "●") or
+                                      (not uses_white_checkers and selected_checker[2] == "○")):
+            # Actualiza el estado de la variable de ficha seleccionada
+            self.__selected_checker__ = normal_index
+
+            # Marca la ficha en el tablero como seleccionada
+            # (1 = Resaltador de ficha seleccionada)
+            selected_checker[1] = 1
+            if is_top:
+                self.__top_board_triangles__[index] = selected_checker
+            else:
+                self.__bot_board_triangles__[index] = selected_checker
+            return True
+        return False
