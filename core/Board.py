@@ -50,7 +50,7 @@ class Board:
         return self.__bot_board_triangles__
 
     @property
-    def selected_checker(self):
+    def selected_checker(self) -> int | None:
         """Índice normal de la ficha seleccionada actualmente."""
         return self.__selected_checker__
 
@@ -61,11 +61,6 @@ class Board:
         [fichas blancas, fichas negras]
         """
         return self.__board_bar__
-
-    @property
-    def selected_checker(self) -> int | None:
-        """Índice de la ficha seleccionada actualmente."""
-        return self.__selected_checker__
 
     def new_game_board(self):
         """Resetea el tablero de juego a un estado inicial por defecto."""
@@ -107,6 +102,23 @@ class Board:
                 return False, 12 - normal_index
             if 13 <= normal_index <= 24:
                 return True, normal_index - 13
+    
+    def get_triangle_from_normal(self, normal_index: int, uses_white_checker: bool) -> list:
+        """Obiene el triángulo correspondiente a un índice normal.
+        
+        Args:
+            normal_index: El índice normal (1-24).
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+        Returns:
+            list: El triángulo del tablero.
+        """
+        is_top, index = self.map_normal_index(normal_index, uses_white_checker)
+        if is_top:
+            return self.__top_board_triangles__[index]
+        else:
+            return self.__bot_board_triangles__[index]
+        
+        
 
     def replace_triangle(self, normal_index: int, uses_white_checkers: bool, new_triangle: list):
         """Reemplaza un triángulo en el tablero de juego.
@@ -143,13 +155,8 @@ class Board:
         Returns:
             True si la ficha puede ser colocada, False en caso contrario.
         """
-        # Mapea el índice normal al índice de la lista correspondiente
-        is_top, index = self.map_normal_index(normal_index, uses_white_checkers)
         # Obtiene el triángulo a verificar
-        if is_top:
-            verify_triangle = self.__top_board_triangles__[index]
-        else:
-            verify_triangle = self.__bot_board_triangles__[index]
+        verify_triangle = self.get_triangle_from_normal(normal_index, uses_white_checkers)
 
         # Si el triángulo está vacío, se puede colocar la ficha
         if verify_triangle[0] == 0:
@@ -177,12 +184,8 @@ class Board:
         Returns:
             True si la ficha puede ser movida, False en caso contrario.
         """
-        # Mapea el índice normal al índice de la lista correspondiente
-        is_top, index = self.map_normal_index(normal_index, uses_white_checkers)
-        if is_top:
-            verify_triangle = self.__top_board_triangles__[index]
-        else:
-            verify_triangle = self.__bot_board_triangles__[index]
+        # Obtiene el triángulo a verificar
+        verify_triangle = self.get_triangle_from_normal(normal_index, uses_white_checkers)
 
         # Si el triángulo tiene fichas del mismo color, se puede mover la ficha
         if verify_triangle[0] > 0 and ((uses_white_checkers and verify_triangle[2] == "●") or (
@@ -204,17 +207,9 @@ class Board:
         Returns:
             True si una ficha fue comida durante el movimiento, False en caso contrario.
         """
-        # Mapea los índices normales a los índices de las listas correspondientes
-        org_is_top, org_index = self.map_normal_index(normal_origin, uses_white_checkers)
-        if org_is_top:
-            origin_triangle = self.__top_board_triangles__[org_index]
-        else:
-            origin_triangle = self.__bot_board_triangles__[org_index]
-        dest_is_top, dest_index = self.map_normal_index(normal_dest, uses_white_checkers)
-        if dest_is_top:
-            dest_triangle = self.__top_board_triangles__[dest_index]
-        else:
-            dest_triangle = self.__bot_board_triangles__[dest_index]
+        # Obtiene los triángulos de origen y destino
+        origin_triangle = self.get_triangle_from_normal(normal_origin, uses_white_checkers)
+        dest_triangle = self.get_triangle_from_normal(normal_dest, uses_white_checkers)
 
         # Realiza el movimiento
         # Disminuye el conteo en el triángulo de origen
@@ -255,6 +250,8 @@ class Board:
         combinaciones de números positivos en una tupla.
         Sin repeticiones y ordenadas de menor a mayor.
 
+        Ej.: (2, 2, 2, 2) -> (2, 4, 6, 8)
+        
         Args:
             numbers: Una tupla de números enteros.
         Returns:
@@ -345,28 +342,41 @@ class Board:
         Returns:
             bool: True si la ficha fue seleccionada, False en caso contrario.
         """
-        # Mapea el índice normal al índice de la lista correspondiente
-        is_top, index = self.map_normal_index(normal_index, uses_white_checkers)
-        if is_top:
-            selected_checker = self.__top_board_triangles__[index]
-        else:
-            selected_checker = self.__bot_board_triangles__[index]
+        # Obtiene el triángulo seleccionado
+        selected_triangle = self.get_triangle_from_normal(normal_index, uses_white_checkers)
 
         # Si el triángulo tiene fichas del mismo color, se puede mover la ficha
-        if selected_checker[0] > 0 and ((uses_white_checkers and selected_checker[2] == "●") or
-                                      (not uses_white_checkers and selected_checker[2] == "○")):
+        if selected_triangle[0] > 0 and ((uses_white_checkers and selected_triangle[2] == "●") or
+                                      (not uses_white_checkers and selected_triangle[2] == "○")):
             # Actualiza el estado de la variable de ficha seleccionada
             self.__selected_checker__ = normal_index
 
             # Marca la ficha en el tablero como seleccionada
             # (1 = Resaltador de ficha seleccionada)
-            selected_checker[1] = 1
-            if is_top:
-                self.__top_board_triangles__[index] = selected_checker
-            else:
-                self.__bot_board_triangles__[index] = selected_checker
+            selected_triangle[1] = 1
+            self.replace_triangle(normal_index, uses_white_checkers, selected_triangle)
             return True
         return False
+    
+    def deselect_checker(self, uses_white_checkers: bool) -> bool:
+        """Verifica si el triángulo marcado como seleccionado lo está para el jugador.
+        Si es así, lo deselecciona.
+
+        Args:
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+        Returns:
+            bool: True si se deseleccionó el triángulo, False en caso contrario.
+        """
+        if self.__selected_checker__ is None:
+            return False
+        selected_triangle = self.get_triangle_from_normal(self.__selected_checker__, uses_white_checkers)
+        if selected_triangle[1] == 1:
+            selected_triangle[1] = 0
+            self.replace_triangle(self.__selected_checker__, uses_white_checkers, selected_triangle)
+            self.__selected_checker__ = None
+            return True
+        return False
+        
 
     def verify_player_can_take_out(self, uses_white_checkers: bool) -> bool:
         """Verifica si un jugador puede comenzar a retirar sus fichas del tablero.
@@ -378,16 +388,12 @@ class Board:
         """
         # Recorre todos los triángulos normales que no
         # estén en el último cuadrante.
-        for normal_i in range(1, 19):
-            is_top, index = self.map_normal_index(normal_i, uses_white_checkers)
-            if is_top:
-                triangle = self.__top_board_triangles__[index]
-            else:
-                triangle = self.__bot_board_triangles__[index]
+        for normal_index in range(1, 19):
+            triangle_to_check = self.get_triangle_from_normal(normal_index, uses_white_checkers)
             # Si hay una o más fichas del jugador, no tiene
             # permitido sacar fichas.
-            if triangle[0] > 0 and ((uses_white_checkers and triangle[2] == "●") or
-                                    (not uses_white_checkers and triangle[2] == "○")):
+            if triangle_to_check[0] > 0 and ((uses_white_checkers and triangle_to_check[2] == "●") or
+                                    (not uses_white_checkers and triangle_to_check[2] == "○")):
                 return False
         # Si solo quedan fichas en el último cuadrante
         # el jugador puede sacar fichas.
