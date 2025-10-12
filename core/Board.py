@@ -367,3 +367,28 @@ class Board:
                 self.__bot_board_triangles__[index] = selected_checker
             return True
         return False
+
+    def verify_player_can_take_out(self, uses_white_checkers: bool) -> bool:
+        """Verifica si un jugador puede comenzar a retirar sus fichas del tablero.
+        
+        Args:
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+        Returns:
+            bool: True si el jugador puede comenzar a retirar sus fichas, False en caso contrario
+        """
+        # Recorre todos los triángulos normales que no
+        # estén en el último cuadrante.
+        for normal_i in range(1, 19):
+            is_top, index = self.map_normal_index(normal_i, uses_white_checkers)
+            if is_top:
+                triangle = self.__top_board_triangles__[index]
+            else:
+                triangle = self.__bot_board_triangles__[index]
+            # Si hay una o más fichas del jugador, no tiene
+            # permitido sacar fichas.
+            if triangle[0] > 0 and ((uses_white_checkers and triangle[2] == "●") or
+                                    (not uses_white_checkers and triangle[2] == "○")):
+                return False
+        # Si solo quedan fichas en el último cuadrante
+        # el jugador puede sacar fichas.
+        return True
