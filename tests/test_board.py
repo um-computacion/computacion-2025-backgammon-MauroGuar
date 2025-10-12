@@ -215,6 +215,7 @@ class TestBoard(unittest.TestCase):
         self.assertFalse(self.board.__is_bar_empty__[0])
 
     def test_get_possible_sums_tuple(self):
+        """Verifica get_possible_sums_tuple() con varios conjuntos de dados."""
         test_tuples = ((1, 2), (3, 4), (5, 6), (2, 2), (3, 3, 3), (6, 6, 6, 6))
         expected_tuples = ((1, 2, 3), (3, 4, 7), (5, 6, 11), (2, 4), (3, 6, 9), (6, 12, 18, 24))
         for i, test in enumerate(test_tuples):
@@ -446,6 +447,93 @@ class TestBoard(unittest.TestCase):
         self.board.replace_triangle(17, False, [0, 0, " "])
         # Deja la ficha en 1
         self.assertFalse(self.board.verify_player_can_take_out(False))
+
+    def test_get_triangle_from_normal_white_checkers_top(self):
+        """Verifica get_triangle_from_normal() para fichas blancas en triángulos superiores."""
+        # Triángulos 1-12 para blancas están en top
+        self.assertEqual(self.board.get_triangle_from_normal(1, True), [2, 0, "●"])
+        self.assertEqual(self.board.get_triangle_from_normal(6, True), [5, 0, "○"])
+        self.assertEqual(self.board.get_triangle_from_normal(12, True), [5, 0, "●"])
+
+    def test_get_triangle_from_normal_white_checkers_bot(self):
+        """Verifica get_triangle_from_normal() para fichas blancas en triángulos inferiores."""
+        # Triángulos 13-24 para blancas están en bot
+        self.assertEqual(self.board.get_triangle_from_normal(13, True), [5, 0, "○"])
+        self.assertEqual(self.board.get_triangle_from_normal(18, True), [0, 0, " "])
+        self.assertEqual(self.board.get_triangle_from_normal(24, True), [2, 0, "○"])
+
+    def test_get_triangle_from_normal_black_checkers_top(self):
+        """Verifica get_triangle_from_normal() para fichas negras en triángulos superiores."""
+        # Triángulos 13-24 para negras están en top
+        self.assertEqual(self.board.get_triangle_from_normal(13, False), [5, 0, "●"])
+        self.assertEqual(self.board.get_triangle_from_normal(18, False), [0, 0, " "])
+        self.assertEqual(self.board.get_triangle_from_normal(24, False), [2, 0, "●"])
+
+    def test_get_triangle_from_normal_black_checkers_bot(self):
+        """Verifica get_triangle_from_normal() para fichas negras en triángulos inferiores."""
+        # Triángulos 1-12 para negras están en bot
+        self.assertEqual(self.board.get_triangle_from_normal(1, False), [2, 0, "○"])
+        self.assertEqual(self.board.get_triangle_from_normal(6, False), [5, 0, "●"])
+        self.assertEqual(self.board.get_triangle_from_normal(12, False), [5, 0, "○"])
+
+    def test_get_triangle_from_normal_modified_triangle(self):
+        """Verifica get_triangle_from_normal() después de modificar un triángulo."""
+        # Modifica un triángulo y verifica que se obtenga correctamente
+        new_triangle = [3, 1, "●"]
+        self.board.replace_triangle(1, True, new_triangle)
+        self.assertEqual(self.board.get_triangle_from_normal(1, True), new_triangle)
+
+    def test_deselect_checker_no_selection(self):
+        """Verifica deselect_checker() cuando no hay ficha seleccionada."""
+        # Sin selección previa
+        self.assertIsNone(self.board.selected_checker)
+        # El método debería devolver False si no hay selección
+        result = self.board.deselect_checker(True)
+        self.assertFalse(result)
+
+    def test_deselect_checker_with_selection_white(self):
+        """Verifica deselect_checker() para fichas blancas con selección previa."""
+        # Selecciona una ficha blanca
+        self.board.select_checker(1, True)
+        self.assertEqual(self.board.selected_checker, 1)
+        # Verifica que esté marcada como seleccionada
+        triangle = self.board.get_triangle_from_normal(1, True)
+        self.assertEqual(triangle[1], 1)
+        # Deselecciona
+        result = self.board.deselect_checker(True)
+        self.assertTrue(result)
+        # Verifica que ya no esté seleccionada
+        triangle = self.board.get_triangle_from_normal(1, True)
+        self.assertEqual(triangle[1], 0)
+        self.assertIsNone(self.board.selected_checker)
+
+    def test_deselect_checker_with_selection_black(self):
+        """Verifica deselect_checker() para fichas negras con selección previa."""
+        # Selecciona una ficha negra
+        self.board.select_checker(1, False)
+        self.assertEqual(self.board.selected_checker, 1)
+        # Verifica que esté marcada como seleccionada
+        triangle = self.board.get_triangle_from_normal(1, False)
+        self.assertEqual(triangle[1], 1)
+        # Deselecciona
+        result = self.board.deselect_checker(False)
+        self.assertTrue(result)
+        # Verifica que ya no esté seleccionada
+        triangle = self.board.get_triangle_from_normal(1, False)
+        self.assertEqual(triangle[1], 0)
+        self.assertIsNone(self.board.selected_checker)
+
+    def test_deselect_checker_wrong_player(self):
+        """Verifica deselect_checker() cuando el jugador no coincide con la selección."""
+        # Selecciona con blancas
+        self.board.select_checker(1, True)
+        # Intenta deseleccionar con negras
+        result = self.board.deselect_checker(False)
+        self.assertFalse(result)
+        # Verifica que siga seleccionada
+        self.assertEqual(self.board.selected_checker, 1)
+        triangle = self.board.get_triangle_from_normal(1, True)
+        self.assertEqual(triangle[1], 1)
 
 
 if __name__ == '__main__':
