@@ -1127,3 +1127,117 @@ def test_set_player_name_numbers_and_letters(self):
 ### Uso de Respuesta
 
 Utilicé el código sin cambiarlo.
+
+## Prompt #11
+
+### Modelo: Grok Code Fast 1 mediante Kilo Code (a través del sistema)
+
+### Prompt
+
+Write unit tests for the `verify_player_can_take_out` method in the @/core/Board.py file. Write them in the @/tests/test_board.py file. Use the unittest standard Python library.
+
+To accomplish this, first read and analyze the entire Board class to understand how the game works. Then, carefully read and analyze the `verify_player_can_take_out` method.
+
+Once you have done that, write professional unit tests ensuring comprehensive coverage of all test cases, including edge cases, normal scenarios, and error conditions.
+
+Follow the Google style guide for Python code and documentation. The link to the Google style guide is: @https://github.com/google/styleguide/blob/1387bff19c141c047c483cbe813659625f93defa/pyguide.md
+
+The code must be in english. However, all documentation must be in Spanish, including docstrings and comments.
+
+### Referencias
+
+- core/Board.py (en el contexto del workspace)
+- tests/test_board.py (en el contexto del workspace)
+- https://github.com/google/styleguide/blob/1387bff19c141c047c483cbe813659625f93defa/pyguide.md
+
+### Respuesta
+
+I added comprehensive unit tests for the `verify_player_can_take_out` method to the `tests/test_board.py` file. The method checks if a player can start taking out checkers by verifying no checkers are in triangles 1-18. Tests cover default board scenarios (cannot take out), all checkers in home board (19-24, can take out), edge cases like checkers in triangle 18, opponent-only checkers in 1-18, and mixed positions. All tests pass, ensuring full coverage without breaking existing functionality.
+
+```python
+    def test_verify_player_can_take_out_white_default_board(self):
+        """Verifica que el jugador blanco no puede retirar fichas en el tablero por defecto."""
+        # En el tablero por defecto, el jugador blanco tiene fichas en triángulos 1-18
+        self.assertFalse(self.board.verify_player_can_take_out(True))
+
+    def test_verify_player_can_take_out_black_default_board(self):
+        """Verifica que el jugador negro no puede retirar fichas en el tablero por defecto."""
+        # En el tablero por defecto, el jugador negro tiene fichas en triángulos 1-18
+        self.assertFalse(self.board.verify_player_can_take_out(False))
+
+    def test_verify_player_can_take_out_white_all_in_home(self):
+        """Verifica que el jugador blanco puede retirar fichas cuando todas están en el último cuadrante."""
+        # Remueve las fichas blancas de los triángulos 1-18
+        self.board.replace_triangle(1, True, [0, 0, " "])  # Triángulo 1
+        self.board.replace_triangle(12, True, [0, 0, " "])  # Triángulo 12
+        self.board.replace_triangle(17, True, [0, 0, " "])  # Triángulo 17
+        # Ahora todas las fichas blancas están en 19-24 o retiradas
+        self.assertTrue(self.board.verify_player_can_take_out(True))
+
+    def test_verify_player_can_take_out_black_all_in_home(self):
+        """Verifica que el jugador negro puede retirar fichas cuando todas están en el último cuadrante."""
+        # Remueve las fichas negras de los triángulos 1-18
+        self.board.replace_triangle(1, False, [0, 0, " "])  # Triángulo 1
+        self.board.replace_triangle(12, False, [0, 0, " "])  # Triángulo 12
+        self.board.replace_triangle(17, False, [0, 0, " "])  # Triángulo 17
+        # Ahora todas las fichas negras están en 19-24 o retiradas
+        self.assertTrue(self.board.verify_player_can_take_out(False))
+
+    def test_verify_player_can_take_out_white_checker_in_18(self):
+        """Verifica que el jugador blanco no puede retirar si tiene una ficha en el triángulo 18."""
+        # Agrega una ficha blanca en el triángulo 18
+        self.board.replace_triangle(18, True, [1, 0, "●"])
+        # Remueve otras fichas blancas de 1-17 para aislar el caso
+        self.board.replace_triangle(1, True, [0, 0, " "])
+        self.board.replace_triangle(12, True, [0, 0, " "])
+        self.board.replace_triangle(17, True, [0, 0, " "])
+        self.assertFalse(self.board.verify_player_can_take_out(True))
+
+    def test_verify_player_can_take_out_black_checker_in_18(self):
+        """Verifica que el jugador negro no puede retirar si tiene una ficha en el triángulo 18."""
+        # Agrega una ficha negra en el triángulo 18
+        self.board.replace_triangle(18, False, [1, 0, "○"])
+        # Remueve otras fichas negras de 1-17
+        self.board.replace_triangle(1, False, [0, 0, " "])
+        self.board.replace_triangle(12, False, [0, 0, " "])
+        self.board.replace_triangle(17, False, [0, 0, " "])
+        self.assertFalse(self.board.verify_player_can_take_out(False))
+
+    def test_verify_player_can_take_out_white_opponent_in_1_18(self):
+        """Verifica que el jugador blanco puede retirar si solo hay fichas del oponente en 1-18."""
+        # Remueve todas las fichas blancas de 1-18, dejando las del oponente
+        self.board.replace_triangle(1, True, [0, 0, " "])
+        self.board.replace_triangle(12, True, [0, 0, " "])
+        self.board.replace_triangle(17, True, [0, 0, " "])
+        # Las fichas negras permanecen en algunos triángulos de 1-18
+        self.assertTrue(self.board.verify_player_can_take_out(True))
+
+    def test_verify_player_can_take_out_black_opponent_in_1_18(self):
+        """Verifica que el jugador negro puede retirar si solo hay fichas del oponente en 1-18."""
+        # Remueve todas las fichas negras de 1-18, dejando las del oponente
+        self.board.replace_triangle(1, False, [0, 0, " "])
+        self.board.replace_triangle(12, False, [0, 0, " "])
+        self.board.replace_triangle(17, False, [0, 0, " "])
+        # Las fichas blancas permanecen en algunos triángulos de 1-18
+        self.assertTrue(self.board.verify_player_can_take_out(False))
+
+    def test_verify_player_can_take_out_white_mixed_positions(self):
+        """Verifica que el jugador blanco no puede retirar si tiene fichas en 1-18 y 19-24."""
+        # Remueve algunas fichas blancas de 1-18, pero deja al menos una
+        self.board.replace_triangle(12, True, [0, 0, " "])
+        self.board.replace_triangle(17, True, [0, 0, " "])
+        # Deja la ficha en 1
+        self.assertFalse(self.board.verify_player_can_take_out(True))
+
+    def test_verify_player_can_take_out_black_mixed_positions(self):
+        """Verifica que el jugador negro no puede retirar si tiene fichas en 1-18 y 19-24."""
+        # Remueve algunas fichas negras de 1-18, pero deja al menos una
+        self.board.replace_triangle(12, False, [0, 0, " "])
+        self.board.replace_triangle(17, False, [0, 0, " "])
+        # Deja la ficha en 1
+        self.assertFalse(self.board.verify_player_can_take_out(False))
+```
+
+### Uso de Respuesta
+
+Utilicé el código sin cambiarlo.
