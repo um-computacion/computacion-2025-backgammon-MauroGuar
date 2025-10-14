@@ -535,6 +535,145 @@ class TestBoard(unittest.TestCase):
         triangle = self.board.get_triangle_from_normal(1, True)
         self.assertEqual(triangle[1], 1)
 
+    def test_clean_selection_single_triangle_white(self):
+        """Verifica clean_selection() para deseleccionar un solo triángulo con fichas blancas."""
+        # Selecciona un triángulo blanco
+        self.board.select_checker(1, True)
+        triangle = self.board.get_triangle_from_normal(1, True)
+        self.assertEqual(triangle[1], 1)
+
+        # Deselecciona el triángulo
+        self.board.clean_selection((1,), True)
+        triangle = self.board.get_triangle_from_normal(1, True)
+        self.assertEqual(triangle[1], 0)
+
+    def test_clean_selection_single_triangle_black(self):
+        """Verifica clean_selection() para deseleccionar un solo triángulo con fichas negras."""
+        # Selecciona un triángulo negro
+        self.board.select_checker(1, False)
+        triangle = self.board.get_triangle_from_normal(1, False)
+        self.assertEqual(triangle[1], 1)
+
+        # Deselecciona el triángulo
+        self.board.clean_selection((1,), False)
+        triangle = self.board.get_triangle_from_normal(1, False)
+        self.assertEqual(triangle[1], 0)
+
+    def test_clean_selection_multiple_triangles_white(self):
+        """Verifica clean_selection() para deseleccionar múltiples triángulos con fichas blancas."""
+        # Selecciona varios triángulos blancos
+        self.board.select_checker(1, True)
+        self.board.select_checker(19, True)
+        self.assertEqual(self.board.get_triangle_from_normal(1, True)[1], 1)
+        self.assertEqual(self.board.get_triangle_from_normal(19, True)[1], 1)
+
+        # Deselecciona los triángulos
+        self.board.clean_selection((1, 19), True)
+        self.assertEqual(self.board.get_triangle_from_normal(1, True)[1], 0)
+        self.assertEqual(self.board.get_triangle_from_normal(19, True)[1], 0)
+
+    def test_clean_selection_multiple_triangles_black(self):
+        """Verifica clean_selection() para deseleccionar múltiples triángulos con fichas negras."""
+        # Selecciona varios triángulos negros
+        self.board.select_checker(1, False)
+        self.board.select_checker(19, False)
+        self.assertEqual(self.board.get_triangle_from_normal(1, False)[1], 1)
+        self.assertEqual(self.board.get_triangle_from_normal(19, False)[1], 1)
+
+        # Deselecciona los triángulos
+        self.board.clean_selection((1, 19), False)
+        self.assertEqual(self.board.get_triangle_from_normal(1, False)[1], 0)
+        self.assertEqual(self.board.get_triangle_from_normal(19, False)[1], 0)
+
+    def test_clean_selection_empty_tuple_white(self):
+        """Verifica clean_selection() con una tupla vacía para fichas blancas."""
+        # No hay cambios esperados
+        original_top = [triangle[:] for triangle in self.board.__top_board_triangles__]
+        self.board.clean_selection((), True)
+        self.assertEqual(self.board.__top_board_triangles__, original_top)
+
+    def test_clean_selection_empty_tuple_black(self):
+        """Verifica clean_selection() con una tupla vacía para fichas negras."""
+        # No hay cambios esperados
+        original_bot = [triangle[:] for triangle in self.board.__bot_board_triangles__]
+        self.board.clean_selection((), False)
+        self.assertEqual(self.board.__bot_board_triangles__, original_bot)
+
+    def test_clean_selection_already_deselected_white(self):
+        """Verifica clean_selection() en triángulos ya deseleccionados con fichas blancas."""
+        # Los triángulos por defecto no están seleccionados
+        triangle = self.board.get_triangle_from_normal(2, True)
+        self.assertEqual(triangle[1], 0)
+
+        # Deseleccionar no debería cambiar nada
+        self.board.clean_selection((2,), True)
+        triangle = self.board.get_triangle_from_normal(2, True)
+        self.assertEqual(triangle[1], 0)
+
+    def test_clean_selection_already_deselected_black(self):
+        """Verifica clean_selection() en triángulos ya deseleccionados con fichas negras."""
+        # Los triángulos por defecto no están seleccionados
+        triangle = self.board.get_triangle_from_normal(2, False)
+        self.assertEqual(triangle[1], 0)
+
+        # Deseleccionar no debería cambiar nada
+        self.board.clean_selection((2,), False)
+        triangle = self.board.get_triangle_from_normal(2, False)
+        self.assertEqual(triangle[1], 0)
+
+    def test_clean_selection_mixed_selected_deselected_white(self):
+        """Verifica clean_selection() con mezcla de triángulos seleccionados y deseleccionados para blancas."""
+        # Selecciona uno, deja otro deseleccionado
+        self.board.select_checker(1, True)
+        self.assertEqual(self.board.get_triangle_from_normal(1, True)[1], 1)
+        self.assertEqual(self.board.get_triangle_from_normal(2, True)[1], 0)
+
+        # Deselecciona ambos
+        self.board.clean_selection((1, 2), True)
+        self.assertEqual(self.board.get_triangle_from_normal(1, True)[1], 0)
+        self.assertEqual(self.board.get_triangle_from_normal(2, True)[1], 0)
+
+    def test_clean_selection_mixed_selected_deselected_black(self):
+        """Verifica clean_selection() con mezcla de triángulos seleccionados y deseleccionados para negras."""
+        # Selecciona uno, deja otro deseleccionado
+        self.board.select_checker(1, False)
+        self.assertEqual(self.board.get_triangle_from_normal(1, False)[1], 1)
+        self.assertEqual(self.board.get_triangle_from_normal(2, False)[1], 0)
+
+        # Deselecciona ambos
+        self.board.clean_selection((1, 2), False)
+        self.assertEqual(self.board.get_triangle_from_normal(1, False)[1], 0)
+        self.assertEqual(self.board.get_triangle_from_normal(2, False)[1], 0)
+
+    def test_clean_selection_does_not_affect_other_triangles_white(self):
+        """Verifica que clean_selection() no afecte otros triángulos para fichas blancas."""
+        # Selecciona dos triángulos
+        self.board.select_checker(1, True)
+        self.board.select_checker(19, True)
+        self.assertEqual(self.board.get_triangle_from_normal(1, True)[1], 1)
+        self.assertEqual(self.board.get_triangle_from_normal(19, True)[1], 1)
+        self.assertEqual(self.board.get_triangle_from_normal(2, True)[1], 0)
+
+        # Deselecciona solo uno
+        self.board.clean_selection((1,), True)
+        self.assertEqual(self.board.get_triangle_from_normal(1, True)[1], 0)
+        self.assertEqual(self.board.get_triangle_from_normal(19, True)[1], 1)  # Aún seleccionado
+        self.assertEqual(self.board.get_triangle_from_normal(2, True)[1], 0)
+
+    def test_clean_selection_does_not_affect_other_triangles_black(self):
+        """Verifica que clean_selection() no afecte otros triángulos para fichas negras."""
+        # Selecciona dos triángulos
+        self.board.select_checker(1, False)
+        self.board.select_checker(19, False)
+        self.assertEqual(self.board.get_triangle_from_normal(1, False)[1], 1)
+        self.assertEqual(self.board.get_triangle_from_normal(19, False)[1], 1)
+        self.assertEqual(self.board.get_triangle_from_normal(2, False)[1], 0)
+
+        # Deselecciona solo uno
+        self.board.clean_selection((1,), False)
+        self.assertEqual(self.board.get_triangle_from_normal(1, False)[1], 0)
+        self.assertEqual(self.board.get_triangle_from_normal(19, False)[1], 1)  # Aún seleccionado
+        self.assertEqual(self.board.get_triangle_from_normal(2, False)[1], 0)
 
 if __name__ == '__main__':
     unittest.main()
