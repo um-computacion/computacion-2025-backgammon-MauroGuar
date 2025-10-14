@@ -102,10 +102,10 @@ class Board:
                 return False, 12 - normal_index
             if 13 <= normal_index <= 24:
                 return True, normal_index - 13
-    
+
     def get_triangle_from_normal(self, normal_index: int, uses_white_checker: bool) -> list:
         """Obiene el triángulo correspondiente a un índice normal.
-        
+
         Args:
             normal_index: El índice normal (1-24).
             uses_white_checkers: Indica si el jugador usa fichas blancas.
@@ -117,8 +117,6 @@ class Board:
             return self.__top_board_triangles__[index]
         else:
             return self.__bot_board_triangles__[index]
-        
-        
 
     def replace_triangle(self, normal_index: int, uses_white_checkers: bool, new_triangle: list):
         """Reemplaza un triángulo en el tablero de juego.
@@ -251,7 +249,7 @@ class Board:
         Sin repeticiones y ordenadas de menor a mayor.
 
         Ej.: (2, 2, 2, 2) -> (2, 4, 6, 8)
-        
+
         Args:
             numbers: Una tupla de números enteros.
         Returns:
@@ -332,7 +330,7 @@ class Board:
                 self.__board_bar__[1] -= 1
             if self.__board_bar__[1] == 0:
                 self.__is_bar_empty__[1] = True
-    
+
     def select_checker(self, normal_index: int, uses_white_checkers: bool) -> bool:
         """Selecciona una ficha en un triángulo específico si es movible.
 
@@ -347,7 +345,7 @@ class Board:
 
         # Si el triángulo tiene fichas del mismo color, se puede mover la ficha
         if selected_triangle[0] > 0 and ((uses_white_checkers and selected_triangle[2] == "●") or
-                                      (not uses_white_checkers and selected_triangle[2] == "○")):
+                                         (not uses_white_checkers and selected_triangle[2] == "○")):
             # Actualiza el estado de la variable de ficha seleccionada
             self.__selected_checker__ = normal_index
 
@@ -357,7 +355,7 @@ class Board:
             self.replace_triangle(normal_index, uses_white_checkers, selected_triangle)
             return True
         return False
-    
+
     def deselect_checker(self, uses_white_checkers: bool) -> bool:
         """Verifica si el triángulo marcado como seleccionado lo está para el jugador.
         Si es así, lo deselecciona.
@@ -376,11 +374,10 @@ class Board:
             self.__selected_checker__ = None
             return True
         return False
-        
 
     def verify_player_can_take_out(self, uses_white_checkers: bool) -> bool:
         """Verifica si un jugador puede comenzar a retirar sus fichas del tablero.
-        
+
         Args:
             uses_white_checkers: Indica si el jugador usa fichas blancas.
         Returns:
@@ -393,8 +390,26 @@ class Board:
             # Si hay una o más fichas del jugador, no tiene
             # permitido sacar fichas.
             if triangle_to_check[0] > 0 and ((uses_white_checkers and triangle_to_check[2] == "●") or
-                                    (not uses_white_checkers and triangle_to_check[2] == "○")):
+                                             (not uses_white_checkers and triangle_to_check[2] == "○")):
                 return False
         # Si solo quedan fichas en el último cuadrante
         # el jugador puede sacar fichas.
         return True
+
+    def clean_selection(self, triangles_deselect_normal: tuple[int], uses_white_checkers: bool):
+        """Deselecciona múltiples triángulos en el tablero de juego.
+
+        No realiza ninguna verificación de validez.
+        Ya debe haberse verificado previamente.
+
+        Args:
+            triangles_deselect_normal: Una tupla de índices normales (1-24) de los triángulos a deseleccionar.
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+        """
+        # Itera sobre los triángulos a deseleccionar
+        for normal_index in triangles_deselect_normal:
+            # Obtiene el triángulo a partir del índice normal
+            triangle_to_deselect = self.get_triangle_from_normal(normal_index, uses_white_checkers)
+            # Deselecciona el triángulo (0 = Ninguna selección)
+            triangle_to_deselect[1] = 0
+            self.replace_triangle(normal_index, uses_white_checkers, triangle_to_deselect)
