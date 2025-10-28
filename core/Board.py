@@ -23,8 +23,11 @@ class Board:
     Attributes:
         __top_board_triangles__: Una lista que contiene los triángulos superiores.
         __bot_board_triangles__: Una lista que contiene los triángulos inferiores.
+        __total_num_checkers_per_player__: La cantidad total de fichas por jugador.
         __selected_checker__: El índice normal (1-24) de la ficha seleccionada actualmente, o None si ninguna.
         __board_bar__: Una lista que contiene la cantidad de fichas en la barra.
+                [fichas blancas, fichas negras]
+        __checkers_off__: Una lista que contiene la cantidad de fichas retiradas del tablero.
                 [fichas blancas, fichas negras]
         __is_bar_empty__: Una lista de booleanos que indica si la barra de cada jugador está vacía.
                 [fichas blancas, fichas negras]
@@ -34,8 +37,10 @@ class Board:
         """Inicializa una instancia de tablero de juego por defecto."""
         self.__top_board_triangles__ = []
         self.__bot_board_triangles__ = []
+        self.__total_num_checkers_per_player__ = 0
         self.__selected_checker__ = None
         self.__board_bar__ = []
+        self.__checkers_off__ = []
         self.__is_bar_empty__ = []
         self.new_game_board()
 
@@ -69,8 +74,10 @@ class Board:
 
         self.__bot_board_triangles__ = [[5, 0, "○"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [3, 0, "●"], [0, 0, " "],
                                         [5, 0, "●"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [0, 0, " "], [2, 0, "○"]]
+        self.__total_num_checkers_per_player__ = 15
         self.__selected_checker__ = None
         self.__board_bar__ = [0, 0]
+        self.__checkers_off__ = [0, 0]
         self.__is_bar_empty__ = [True, True]
 
     @staticmethod
@@ -413,3 +420,27 @@ class Board:
             # Deselecciona el triángulo (0 = Ninguna selección)
             triangle_to_deselect[1] = 0
             self.replace_triangle(normal_index, uses_white_checkers, triangle_to_deselect)
+
+    def take_out_checker(self, uses_white_checkers: bool):
+        """Retira una ficha del tablero de juego.
+
+        Args:
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+        """
+        if uses_white_checkers:
+            self.__checkers_off__[0] += 1
+        else:
+            self.__checkers_off__[1] += 1
+
+    def is_match_won(self) -> tuple[bool, bool]:
+        """Verifica si algún jugador ha ganado la partida.
+
+        Returns:
+            tuple: Un par de booleanos que indican si alguien ganó (primer booleano)
+            y si el jugador de fichas blancas ganó (segundo booleano).
+        """
+        if self.__checkers_off__[0] >= self.__total_num_checkers_per_player__:
+            return True, True
+        if self.__checkers_off__[1] >= self.__total_num_checkers_per_player__:
+            return True, False
+        return False, False

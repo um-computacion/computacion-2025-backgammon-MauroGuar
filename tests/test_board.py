@@ -675,5 +675,94 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(self.board.get_triangle_from_normal(19, False)[1], 1)  # Aún seleccionado
         self.assertEqual(self.board.get_triangle_from_normal(2, False)[1], 0)
 
+    def test_take_out_checker_white(self):
+        """Verifica take_out_checker() para retirar una ficha blanca."""
+        initial_off = self.board.__checkers_off__[0]
+        self.board.take_out_checker(True)
+        self.assertEqual(self.board.__checkers_off__[0], initial_off + 1,
+                         "La cantidad de fichas blancas retiradas debe incrementarse en 1.")
+
+    def test_take_out_checker_black(self):
+        """Verifica take_out_checker() para retirar una ficha negra."""
+        initial_off = self.board.__checkers_off__[1]
+        self.board.take_out_checker(False)
+        self.assertEqual(self.board.__checkers_off__[1], initial_off + 1,
+                         "La cantidad de fichas negras retiradas debe incrementarse en 1.")
+
+    def test_take_out_checker_multiple_white(self):
+        """Verifica take_out_checker() al retirar múltiples fichas blancas."""
+        initial_off = self.board.__checkers_off__[0]
+        self.board.take_out_checker(True)
+        self.board.take_out_checker(True)
+        self.board.take_out_checker(True)
+        self.assertEqual(self.board.__checkers_off__[0], initial_off + 3,
+                         "La cantidad de fichas blancas retiradas debe incrementarse correctamente.")
+
+    def test_take_out_checker_multiple_black(self):
+        """Verifica take_out_checker() al retirar múltiples fichas negras."""
+        initial_off = self.board.__checkers_off__[1]
+        self.board.take_out_checker(False)
+        self.board.take_out_checker(False)
+        self.board.take_out_checker(False)
+        self.assertEqual(self.board.__checkers_off__[1], initial_off + 3,
+                         "La cantidad de fichas negras retiradas debe incrementarse correctamente.")
+
+    def test_is_match_won_no_winner(self):
+        """Verifica is_match_won() cuando ningún jugador ha ganado."""
+        # Estado inicial: ningún jugador tiene fichas retiradas suficientes
+        won, white_won = self.board.is_match_won()
+        self.assertFalse(won, "No debería haber ganador en el estado inicial.")
+        self.assertFalse(white_won, "El segundo valor debería ser False cuando no hay ganador.")
+
+    def test_is_match_won_white_wins(self):
+        """Verifica is_match_won() cuando el jugador blanco gana."""
+        # Simula que el blanco tiene todas las fichas retiradas
+        self.board.__checkers_off__[0] = self.board.__total_num_checkers_per_player__
+        won, white_won = self.board.is_match_won()
+        self.assertTrue(won, "Debería indicar que hay un ganador.")
+        self.assertTrue(white_won, "Debería indicar que el blanco ganó.")
+
+    def test_is_match_won_black_wins(self):
+        """Verifica is_match_won() cuando el jugador negro gana."""
+        # Simula que el negro tiene todas las fichas retiradas
+        self.board.__checkers_off__[1] = self.board.__total_num_checkers_per_player__
+        won, white_won = self.board.is_match_won()
+        self.assertTrue(won, "Debería indicar que hay un ganador.")
+        self.assertFalse(white_won, "Debería indicar que el negro ganó.")
+
+    def test_is_match_won_white_over_limit(self):
+        """Verifica is_match_won() cuando el blanco tiene más de 15 fichas retiradas."""
+        # Simula que el blanco tiene más de 15 fichas retiradas (caso límite)
+        self.board.__checkers_off__[0] = self.board.__total_num_checkers_per_player__ + 1
+        won, white_won = self.board.is_match_won()
+        self.assertTrue(won, "Debería indicar que hay un ganador incluso si excede.")
+        self.assertTrue(white_won, "Debería indicar que el blanco ganó.")
+
+    def test_is_match_won_black_over_limit(self):
+        """Verifica is_match_won() cuando el negro tiene más de 15 fichas retiradas."""
+        # Simula que el negro tiene más de 15 fichas retiradas (caso límite)
+        self.board.__checkers_off__[1] = self.board.__total_num_checkers_per_player__ + 1
+        won, white_won = self.board.is_match_won()
+        self.assertTrue(won, "Debería indicar que hay un ganador incluso si excede.")
+        self.assertFalse(white_won, "Debería indicar que el negro ganó.")
+
+    def test_is_match_won_both_near_win(self):
+        """Verifica is_match_won() cuando ambos jugadores están cerca de ganar pero ninguno lo ha hecho."""
+        # Ambos tienen 14 fichas retiradas
+        self.board.__checkers_off__[0] = self.board.__total_num_checkers_per_player__ - 1
+        self.board.__checkers_off__[1] = self.board.__total_num_checkers_per_player__ - 1
+        won, white_won = self.board.is_match_won()
+        self.assertFalse(won, "No debería haber ganador si ninguno alcanza 15.")
+        self.assertFalse(white_won, "El segundo valor debería ser False.")
+
+    def test_is_match_won_white_at_limit_black_over(self):
+        """Verifica is_match_won() cuando blanco gana exactamente en el límite y negro tiene más."""
+        # Blanco en 15, negro en 16
+        self.board.__checkers_off__[0] = self.board.__total_num_checkers_per_player__
+        self.board.__checkers_off__[1] = self.board.__total_num_checkers_per_player__ + 1
+        won, white_won = self.board.is_match_won()
+        self.assertTrue(won, "Debería haber un ganador.")
+        self.assertTrue(white_won, "Debería ganar el blanco primero en orden de verificación.")
+
 if __name__ == '__main__':
     unittest.main()

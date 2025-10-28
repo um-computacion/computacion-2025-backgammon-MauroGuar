@@ -1635,3 +1635,129 @@ I added comprehensive unit tests for the `clean_selection` method to the `tests/
 ### Uso de Respuesta
 
 Utilicé el código sin cambiarlo.
+
+## Prompt #14
+
+### Modelo: Grok Code Fast 1 mediante Kilo Code (a través del sistema)
+
+### Prompt
+
+Write comprehensive unit tests for the `take_out_checker` and `is_match_won` methods in the `Board` class located in the 'core/Board.py' (see below for file content) file. Implement these tests in the 'tests/test_board.py' (see below for file content)  file using the `unittest` Python standard library exclusively, avoiding any use of `pytest` or other testing frameworks.
+
+Adhere strictly to the Google Python Style Guide (available at: 'https://github.com/google/styleguide/blob/1387bff19c141c047c483cbe813659625f93defa/pyguide.md)' (see below for site content), ensuring proper naming conventions, indentation, line lengths, and overall code structure. All code, including variable names, method names, and logic, must be written in English.
+
+All documentation, including docstrings for classes, methods, and functions, as well as inline comments, must be written in Spanish. Provide thorough test coverage by including:
+
+- Normal case scenarios for each method.
+- Edge cases, such as boundary conditions, invalid inputs, and error handling.
+- Positive and negative test cases to validate expected behavior.
+- Use appropriate `setUp` and `tearDown` methods where necessary for test initialization and cleanup.
+- Ensure tests are isolated, repeatable, and include assertions with descriptive messages in Spanish.
+- Mock or simulate dependencies if the methods interact with external components, but keep the focus on unit-level testing.
+
+Structure the test class as `TestBoard` inheriting from `unittest.TestCase`, with individual test methods named descriptively (e.g., `test_take_out_checker_valid_move`, `test_is_match_won_draw_condition`).
+
+### Referencias
+
+- core/Board.py (en el contexto del workspace)
+- tests/test_board.py (en el contexto del workspace)
+- https://github.com/google/styleguide/blob/1387bff19c141c047c483cbe813659625f93defa/pyguide.md
+
+### Respuesta
+
+I added comprehensive unit tests for the `take_out_checker` and `is_match_won` methods to the `TestBoard` class in `tests/test_board.py`. The tests cover normal cases, edge cases, and boundary conditions for both methods, including scenarios where no winner exists, white wins, black wins, over-limit checkers, and priority handling. All tests are written in English with Spanish docstrings and descriptive assertion messages, following Google style guidelines.
+
+```python
+    def test_take_out_checker_white(self):
+        """Verifica take_out_checker() para retirar una ficha blanca."""
+        initial_off = self.board.__checkers_off__[0]
+        self.board.take_out_checker(True)
+        self.assertEqual(self.board.__checkers_off__[0], initial_off + 1,
+                         "La cantidad de fichas blancas retiradas debe incrementarse en 1.")
+
+    def test_take_out_checker_black(self):
+        """Verifica take_out_checker() para retirar una ficha negra."""
+        initial_off = self.board.__checkers_off__[1]
+        self.board.take_out_checker(False)
+        self.assertEqual(self.board.__checkers_off__[1], initial_off + 1,
+                         "La cantidad de fichas negras retiradas debe incrementarse en 1.")
+
+    def test_take_out_checker_multiple_white(self):
+        """Verifica take_out_checker() al retirar múltiples fichas blancas."""
+        initial_off = self.board.__checkers_off__[0]
+        self.board.take_out_checker(True)
+        self.board.take_out_checker(True)
+        self.board.take_out_checker(True)
+        self.assertEqual(self.board.__checkers_off__[0], initial_off + 3,
+                         "La cantidad de fichas blancas retiradas debe incrementarse correctamente.")
+
+    def test_take_out_checker_multiple_black(self):
+        """Verifica take_out_checker() al retirar múltiples fichas negras."""
+        initial_off = self.board.__checkers_off__[1]
+        self.board.take_out_checker(False)
+        self.board.take_out_checker(False)
+        self.board.take_out_checker(False)
+        self.assertEqual(self.board.__checkers_off__[1], initial_off + 3,
+                         "La cantidad de fichas negras retiradas debe incrementarse correctamente.")
+
+    def test_is_match_won_no_winner(self):
+        """Verifica is_match_won() cuando ningún jugador ha ganado."""
+        # Estado inicial: ningún jugador tiene fichas retiradas suficientes
+        won, white_won = self.board.is_match_won()
+        self.assertFalse(won, "No debería haber ganador en el estado inicial.")
+        self.assertFalse(white_won, "El segundo valor debería ser False cuando no hay ganador.")
+
+    def test_is_match_won_white_wins(self):
+        """Verifica is_match_won() cuando el jugador blanco gana."""
+        # Simula que el blanco tiene todas las fichas retiradas
+        self.board.__checkers_off__[0] = self.board.__total_num_checkers_per_player__
+        won, white_won = self.board.is_match_won()
+        self.assertTrue(won, "Debería indicar que hay un ganador.")
+        self.assertTrue(white_won, "Debería indicar que el blanco ganó.")
+
+    def test_is_match_won_black_wins(self):
+        """Verifica is_match_won() cuando el jugador negro gana."""
+        # Simula que el negro tiene todas las fichas retiradas
+        self.board.__checkers_off__[1] = self.board.__total_num_checkers_per_player__
+        won, white_won = self.board.is_match_won()
+        self.assertTrue(won, "Debería indicar que hay un ganador.")
+        self.assertFalse(white_won, "Debería indicar que el negro ganó.")
+
+    def test_is_match_won_white_over_limit(self):
+        """Verifica is_match_won() cuando el blanco tiene más de 15 fichas retiradas."""
+        # Simula que el blanco tiene más de 15 fichas retiradas (caso límite)
+        self.board.__checkers_off__[0] = self.board.__total_num_checkers_per_player__ + 1
+        won, white_won = self.board.is_match_won()
+        self.assertTrue(won, "Debería indicar que hay un ganador incluso si excede.")
+        self.assertTrue(white_won, "Debería indicar que el blanco ganó.")
+
+    def test_is_match_won_black_over_limit(self):
+        """Verifica is_match_won() cuando el negro tiene más de 15 fichas retiradas."""
+        # Simula que el negro tiene más de 15 fichas retiradas (caso límite)
+        self.board.__checkers_off__[1] = self.board.__total_num_checkers_per_player__ + 1
+        won, white_won = self.board.is_match_won()
+        self.assertTrue(won, "Debería indicar que hay un ganador incluso si excede.")
+        self.assertFalse(white_won, "Debería indicar que el negro ganó.")
+
+    def test_is_match_won_both_near_win(self):
+        """Verifica is_match_won() cuando ambos jugadores están cerca de ganar pero ninguno lo ha hecho."""
+        # Ambos tienen 14 fichas retiradas
+        self.board.__checkers_off__[0] = self.board.__total_num_checkers_per_player__ - 1
+        self.board.__checkers_off__[1] = self.board.__total_num_checkers_per_player__ - 1
+        won, white_won = self.board.is_match_won()
+        self.assertFalse(won, "No debería haber ganador si ninguno alcanza 15.")
+        self.assertFalse(white_won, "El segundo valor debería ser False.")
+
+    def test_is_match_won_white_at_limit_black_over(self):
+        """Verifica is_match_won() cuando blanco gana exactamente en el límite y negro tiene más."""
+        # Blanco en 15, negro en 16
+        self.board.__checkers_off__[0] = self.board.__total_num_checkers_per_player__
+        self.board.__checkers_off__[1] = self.board.__total_num_checkers_per_player__ + 1
+        won, white_won = self.board.is_match_won()
+        self.assertTrue(won, "Debería haber un ganador.")
+        self.assertTrue(white_won, "Debería ganar el blanco primero en orden de verificación.")
+```
+
+### Uso de Respuesta
+
+Utilicé el código sin cambiarlo.
