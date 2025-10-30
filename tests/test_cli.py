@@ -13,7 +13,7 @@ class TestCLI(unittest.TestCase):
 
     def test_translate_user_input_select_allowed_inpt(self):
         """Prueba la función translate_user_input_select con entradas válidas."""
-        inpt_to_test = tuple("123456789abcdefghijklmno")
+        inpt_to_test = tuple("123456789abcdefghijklmnop")
         for i, char in enumerate(inpt_to_test):
             self.assertEqual(self.cli.translate_user_input_select(char), i + 1)
 
@@ -54,7 +54,7 @@ class TestCLI(unittest.TestCase):
         for _ in range(3):
             self.board.add_checker_to_bar(False)  # Blancas
         for _ in range(2):
-            self.board.add_checker_to_bar(True)   # Negras
+            self.board.add_checker_to_bar(True)  # Negras
         expected = ("│                    │                    │\n"
                     "│              2 ↠ ○ │ ● ↞ 3              │\n"
                     "│                    │                    │\n")
@@ -65,7 +65,7 @@ class TestCLI(unittest.TestCase):
         for _ in range(100):
             self.board.add_checker_to_bar(False)  # Blancas
         for _ in range(50):
-            self.board.add_checker_to_bar(True)   # Negras
+            self.board.add_checker_to_bar(True)  # Negras
         expected = ("│                    │                    │\n"
                     "│             50 ↠ ○ │ ● ↞ 100            │\n"
                     "│                    │                    │\n")
