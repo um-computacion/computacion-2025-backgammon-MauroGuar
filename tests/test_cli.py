@@ -253,7 +253,7 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(result.strip(), expected.strip())
 
     def test_generate_top_board_str_with_selected_checker_white(self):
-        """Prueba que generate_top_board_str maneje correctamente un triángulo con ficha seleccionada."""
+        """Prueba que generate_top_board_str maneje correctamente un triángulo con ficha seleccionada para jugador blanco."""
         triangles = [[1, 1, "●"]] + [[0, 0, " "]] * 11
         result = self.cli.generate_top_board_str(triangles, True)
         expected = (
@@ -264,6 +264,22 @@ class TestCLI(unittest.TestCase):
             "┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐\n"
             "│  ▼  ▼  ▼  ▼  ▼  ▼  │  ▼  ▼  ▼  ▼  ▼  ▼  │\n"
             "│  ●                 │                    │\n"
+            "│  ▲                 │                    │\n"
+        )
+        self.assertEqual(result.strip(), expected.strip())
+
+    def test_generate_top_board_str_with_selected_checker_black(self):
+        """Prueba que generate_top_board_str maneje correctamente un triángulo con ficha seleccionada para jugador negro."""
+        triangles = [[1, 1, "○"]] + [[0, 0, " "]] * 11
+        result = self.cli.generate_top_board_str(triangles, False)
+        expected = (
+            "                                   ┌──────┐\n"
+            "                                   │ 00 ● │\n"
+            "  ─────────────────────────────────└──────┘\n"
+            "   1  2  3  4  5  6     7  8  9  A  B  C\n"
+            "┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐\n"
+            "│  ▼  ▼  ▼  ▼  ▼  ▼  │  ▼  ▼  ▼  ▼  ▼  ▼  │\n"
+            "│  ○                 │                    │\n"
             "│  ▲                 │                    │\n"
         )
         self.assertEqual(result.strip(), expected.strip())
