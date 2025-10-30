@@ -49,6 +49,16 @@ class CLI:
         # Imprime el tablero inferior.
         print(self.generate_bottom_board_str(board_bot_triangles, uses_white_checkers), end="")
 
+    def generate_checkers_off_str(self, uses_white_checkers):
+        off_checkers_num_str = "00"
+        off_checkers_color = "●" if uses_white_checkers else "○"
+        off_checkers_num = self.__board__.checkers_off[0 if uses_white_checkers else 1]
+        if off_checkers_num < 10:
+            off_checkers_num_str = f"0{off_checkers_num}"
+        else:
+            off_checkers_num_str = str(off_checkers_num)
+        return f"{off_checkers_num_str} {off_checkers_color}"
+
     def character_to_put_top(self, line_number: int, triangle: list) -> str:
         """Determina el carácter a colocar
         (ficha normal / espacio en blanco / símbolo de selección)
@@ -86,17 +96,22 @@ class CLI:
             str: Una cadena que representa el tablero superior.
         """
         # Encabezado del tablero superior.
+        off_str = self.generate_checkers_off_str(not uses_white_checkers)
         if uses_white_checkers:
             top_board_str = (
-                "  ───────────────────────────────────────\n"
-                "   c  b  a  9  8  7     6  5  4  3  2  1\n"
+                "                                   ┌──────┐\n"
+                f"                                   │ {off_str} │\n"
+                "  ─────────────────────────────────└──────┘\n"
+                "   C  B  A  9  8  7     6  5  4  3  2  1\n"
                 "┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐\n"
                 "│  ▼  ▼  ▼  ▼  ▼  ▼  │  ▼  ▼  ▼  ▼  ▼  ▼  │\n"
             )
         else:
             top_board_str = (
-                "  ───────────────────────────────────────\n"
-                "   1  2  3  4  5  6     7  8  9  a  b  c\n"
+                "                                   ┌──────┐\n"
+                f"                                   │ {off_str} │\n"
+                "  ─────────────────────────────────└──────┘\n"
+                "   1  2  3  4  5  6     7  8  9  A  B  C\n"
                 "┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐\n"
                 "│  ▼  ▼  ▼  ▼  ▼  ▼  │  ▼  ▼  ▼  ▼  ▼  ▼  │\n"
             )
@@ -195,19 +210,26 @@ class CLI:
         bottom_board_str = "".join(str_tmp_pile)
 
         # Agrega el pie del tablero inferior.
+        off_str = self.generate_checkers_off_str(uses_white_checkers)
+        off_possible_move = "P 🡺" if self.__board__.off_tray_posible_move[0 if uses_white_checkers else 1] else "   "
         if uses_white_checkers:
             bottom_board_str += (
                 "│  ▲  ▲  ▲  ▲  ▲  ▲  │  ▲  ▲  ▲  ▲  ▲  ▲  │\n"
                 "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
-                "   d  e  f  g  h  i     j  k  l  m  n  o   \n"
-                "  ───────────────────────────────────────\n"
+                "   D  E  F  G  H  I     J  K  L  M  N  O   \n"
+                "  ─────────────────────────────────┌──────┐\n"
+                f"                               {off_possible_move} │ {off_str} │\n"
+                "                                   └──────┘\n"
+
             )
         else:
             bottom_board_str += (
                 "│  ▲  ▲  ▲  ▲  ▲  ▲  │  ▲  ▲  ▲  ▲  ▲  ▲  │\n"
                 "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
-                "   o  n  m  l  k  j     i  h  g  f  e  d   \n"
-                "  ───────────────────────────────────────\n"
+                "   O  N  M  L  K  J     I  H  G  F  E  D   \n"
+                "  ─────────────────────────────────┌──────┐\n"
+                f"                               {off_possible_move} │ {off_str} │\n"
+                "                                   └──────┘\n"
             )
 
         return bottom_board_str
@@ -256,10 +278,13 @@ class CLI:
         Returns:
             int: El índice del triángulo seleccionado (1-25) o -1 si la entrada es inválida.
         """
-        # Carácteres permitidos para seleccionar triángulos.
-        allowed_inputs = tuple("123456789abcdefghijklmnop")
+        allowed_inputs = list("ABCDEFGHIJKLMNOP") + [str(i) for i in range(1, 26)]
 
         # Verifica si la entrada del usuario es válida.
-        if user_input.lower() in allowed_inputs and len(user_input) == 1:
-            return allowed_inputs.index(user_input.lower()) + 1
+        user_input = user_input.strip().upper()
+        if user_input in allowed_inputs:
+            if user_input.isdigit():
+                return int(user_input)
+            else:
+                return allowed_inputs.index(user_input) + 10
         return -1
