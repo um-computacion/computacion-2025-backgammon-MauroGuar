@@ -33,8 +33,6 @@ class Board:
                 [fichas blancas, fichas negras]
         __is_bar_empty__: Una lista de booleanos que indica si la barra de cada jugador está vacía.
                 [fichas blancas, fichas negras]
-        __can_take_out__: Una lista de booleanos que indica si cada jugador puede comenzar a retirar fichas.
-                [fichas blancas, fichas negras]
         __off_tray_posible_move__: Una lista que indica si el jugador puede mover una ficha al área de retiro.
                 [fichas blancas, fichas negras]
     """
@@ -49,7 +47,6 @@ class Board:
         self.__board_bar__ = []
         self.__checkers_off__ = []
         self.__is_bar_empty__ = []
-        self.__can_take_out__ = []
         self.__off_tray_posible_move__ = []
         self.new_game_board()
 
@@ -77,20 +74,20 @@ class Board:
         return self.__board_bar__
 
     @property
+    def is_bar_empty(self) -> list:
+        """Indica si la barra de cada jugador está vacía.
+
+        [fichas blancas, fichas negras]
+        """
+        return self.__is_bar_empty__
+
+    @property
     def checkers_off(self) -> list:
         """Cantidad de fichas retiradas del tablero.
 
         [fichas blancas, fichas negras]
         """
         return self.__checkers_off__
-
-    @property
-    def can_take_out(self) -> list:
-        """Indica si cada jugador puede comenzar a retirar fichas.
-
-        [fichas blancas, fichas negras]
-        """
-        return self.__can_take_out__
 
     @property
     def off_tray_posible_move(self) -> list:
@@ -283,123 +280,77 @@ class Board:
         return eaten_checker
 
     @staticmethod
-    def get_possible_sums_tuple(numbers: tuple[int, ...]) -> tuple[int, ...]:
-        """Calcula todas las sumas posibles de
-        combinaciones de números positivos en una tupla.
-        Sin repeticiones y ordenadas de menor a mayor.
+    def generate_all_dice_combinations(dice_numbers: tuple[int, ...]) -> tuple:
+        dice_combinations = []
+        for i in range(1, len(dice_numbers) + 1):
+            for combo in combinations(dice_numbers, i):
+                if combo not in dice_combinations:
+                    dice_combinations.append(combo)
+                if 2 <= len(combo) == len(set(combo)):
+                    dice_combinations.append(combo[::-1])
 
-        Ej.: (2, 2, 2, 2) -> (2, 4, 6, 8)
+        return tuple(dice_combinations)
 
-        Args:
-            numbers: Una tupla de números enteros.
-        Returns:
-            Una tupla ordenada de todas las sumas posibles de combinaciones.
-        """
-        # Filtra solo los números positivos
-        positive_numbers = [num for num in numbers if num > 0]
+    def get_possible_dice_combinations(self, selected_checker_normal: int,
+                                       uses_white_checkers: bool, dice_numbers: tuple[int, ...]) -> tuple:
+        possible_dice_combs = []
+        dice_combs_to_check = self.generate_all_dice_combinations(dice_numbers)
 
-        # Hace un set para evitar sumas repetidas
-        possible_sums = set()
-
-        # Calcula todas las combinaciones posibles
-        for i in range(1, len(positive_numbers) + 1):
-            for combo in combinations(positive_numbers, i):
-                possible_sums.add(sum(combo))
-
-        # Retorna una tupla ordenada de las sumas posibles
-        return tuple(sorted(list(possible_sums)))
-
-    def get_possible_moves(self, selected_checker_normal: int,
-                           uses_white_checkers: bool, dice_numbers: tuple[int, ...]) -> tuple[int, ...]:
-        """Calcula y devuelve todos los movimientos posibles para una ficha seleccionada.
-
-        Args:
-            selected_checker_normal: El índice normal (1-24) de la ficha seleccionada.
-            uses_white_checkers: Indica si el jugador usa fichas blancas.
-            dice_numbers: Una tupla de números representando los dados lanzados.
-        Returns:
-            tuple: Una tupla de índices normales (1-24) a los que la ficha puede moverse.
-            Incluye 25 si la ficha puede ser retirada.
-        """
-        movements_possible = []
-        # Obtiene todas las sumas posibles de los números de los dados
-        movements_to_check = self.get_possible_sums_tuple(dice_numbers)
-
-        # Verifica cada movimiento posible
-        for move in movements_to_check:
-            objective_triangle_normal = selected_checker_normal + move
-            # Si el movimiento está dentro del rango del tablero lo verifica
-            if objective_triangle_normal <= 24:
-                if self.verify_checker_placement(objective_triangle_normal, uses_white_checkers):
-                    movements_possible.append(objective_triangle_normal)
-
-            # Si el movimiento excede el rango del tablero,
-            # verifica si se puede retirar la ficha
-            else:
-                self.verify_player_can_take_out(uses_white_checkers)
-                if self.__can_take_out__[0 if uses_white_checkers else 1]:
-                    # Si el movimiento está exactamente a la distancia para retirar
-                    # la ficha, la agrega como posible retiro
-                    if objective_triangle_normal == 25:
-                        movements_possible.append(25)
-                    # Si el movimiento excede la distancia para retirar la ficha,
-                    # verifica si la ficha está por delante de la ficha más avanzada
-                    elif objective_triangle_normal > 25 and selected_checker_normal > self.get_most_advanced_checker(
+        for dice_comb in dice_combs_to_check:
+            possible_dice_nums = []
+            dest_normal_index = selected_checker_normal
+            for dice_num in dice_comb:
+                target_normal_index = dest_normal_index + dice_num
+                if target_normal_index <= 24 and self.verify_checker_placement(target_normal_index,
+                                                                               uses_white_checkers):
+                    dest_normal_index += dice_num
+                    possible_dice_nums.append(dice_num)
+                elif target_normal_index > 24 and self.verify_player_can_take_out(uses_white_checkers):
+                    if target_normal_index == 25:
+                        dest_normal_index += dice_num
+                        possible_dice_nums.append(dice_num)
+                    elif target_normal_index > 25 and selected_checker_normal == self.get_most_advanced_checker(
                             uses_white_checkers):
-                        movements_possible.append(25)
+                        dest_normal_index += dice_num
+                        possible_dice_nums.append(dice_num)
+                else:
+                    possible_dice_nums = []
+                    break
+            if tuple(possible_dice_nums) == dice_comb:
+                possible_dice_combs.append(dice_comb)
+        return tuple(possible_dice_combs)
 
-        # Retorna una tupla de movimientos posibles
-        return tuple(movements_possible)
+    @staticmethod
+    def map_dice_combinations_to_normal_indexes(selected_checker_normal: int, dice_combs: tuple) -> dict:
+        possible_moves_normal = {}
+        for dice_comb in dice_combs:
+            dest_normal_index = selected_checker_normal
+            for dice_num in dice_comb:
+                dest_normal_index += dice_num
+            possible_moves_normal[dest_normal_index] = dice_comb
+        return possible_moves_normal
 
-    def add_checker_to_bar(self, uses_white_checkers: bool):
-        """Agrega una ficha a la barra del tablero.
-
-        Args:
-            uses_white_checkers: Indica si el jugador usa fichas blancas.
-        """
-        player_num = 1 if uses_white_checkers else 0
-        self.__board_bar__[player_num] += 1
-        self.__num_checkers_board_player__[player_num] -= 1
-        self.__is_bar_empty__[player_num] = False
-
-    def remove_checker_from_bar(self, uses_white_checkers: bool):
-        """Remueve una ficha de la barra del tablero.
-        Actualiza el estado de la barra si queda vacía.
-
-        Args:
-            uses_white_checkers: Indica si el jugador usa fichas blancas.
-        """
-        player_num = 0 if uses_white_checkers else 1
-        if self.__board_bar__[player_num] > 0:
-            self.__board_bar__[player_num] -= 1
-            if self.__board_bar__[player_num] == 0:
-                self.__is_bar_empty__[player_num] = True
-
-    def select_checker(self, normal_index: int, uses_white_checkers: bool) -> bool:
-        """Selecciona una ficha en un triángulo específico si es movible.
+    def select_checker(self, normal_index: int, uses_white_checkers: bool, dice_numbers: tuple[int, ...]) -> dict:
+        """Selecciona una ficha en un triángulo específico si es movible
+        y marca los movimientos posibles en el tablero.
 
         Args:
             normal_index: El índice normal (1-24) del triángulo.
             uses_white_checkers: Indica si el jugador usa fichas blancas.
+            dice_numbers: Una tupla de números representando los dados lanzados.
         Returns:
             bool: True si la ficha fue seleccionada, False en caso contrario.
         """
+        # Deselecciona cualquier ficha previamente seleccionada
+        self.deselect_checker(uses_white_checkers)
+
         # Obtiene el triángulo seleccionado
         selected_triangle = self.get_triangle_from_normal(normal_index, uses_white_checkers)
 
-        # Si el triángulo tiene fichas del mismo color, se puede mover la ficha
-        if selected_triangle[0] > 0 and ((uses_white_checkers and selected_triangle[2] == "●") or
-                                         (not uses_white_checkers and selected_triangle[2] == "○")):
-            # Obtiene los movimientos posibles para la ficha seleccionada
-            posible_moves = self.get_possible_moves(normal_index, uses_white_checkers)
-            # Si hay movimientos posibles, selecciona la ficha
-            if posible_moves:
-                # Si hay un movimiento posible para retirar la ficha, actualiza el estado
-                if 25 in posible_moves:
-                    self.__off_tray_posible_move__[0 if uses_white_checkers else 1] = True
-                else:
-                    self.__off_tray_posible_move__[0 if uses_white_checkers else 1] = False
-
+        # Verifica si la ficha puede ser movida
+        if self.verify_movable_checker(normal_index, uses_white_checkers):
+            poss_dice_combs = self.get_possible_dice_combinations(normal_index, uses_white_checkers, dice_numbers)
+            if poss_dice_combs:
                 # Actualiza el estado de la variable de ficha seleccionada
                 self.__selected_checker__ = normal_index
                 # Marca la ficha en el tablero como seleccionada
@@ -407,19 +358,22 @@ class Board:
                 selected_triangle[1] = 1
                 self.replace_triangle(normal_index, uses_white_checkers, selected_triangle)
 
-                # Marca los movimientos posibles en el tablero
-                for move in posible_moves:
-                    if move != 25:
-                        possible_move_triangle = self.get_triangle_from_normal(move, uses_white_checkers)
-                        possible_move_triangle[1] = 2  # (2 = Posible movimiento)
-                        self.replace_triangle(move, uses_white_checkers, possible_move_triangle)
-
-                return True
-        return False
+                poss_moves = self.map_dice_combinations_to_normal_indexes(normal_index, poss_dice_combs)
+                possible_moves_normals = list(poss_moves.keys())
+                for move_normal in possible_moves_normals:
+                    if move_normal == 25:
+                        self.__off_tray_posible_move__[0 if uses_white_checkers else 1] = True
+                        continue
+                    move_triangle = self.get_triangle_from_normal(move_normal, uses_white_checkers)
+                    # Marca el triángulo como un posible movimiento
+                    # (2 = Posible movimiento)
+                    move_triangle[1] = 2
+                    self.replace_triangle(move_normal, uses_white_checkers, move_triangle)
+                return poss_moves
+        return {}
 
     def deselect_checker(self, uses_white_checkers: bool):
-        """Verifica si el triángulo marcado como seleccionado lo está para el jugador.
-        Si es así, lo deselecciona.
+        """Verifica si hay un triángulo seleccionado. Si es así, lo deselecciona.
         Además, limpia todas las marcas de posibles movimientos en el tablero.
 
         Args:
@@ -445,6 +399,30 @@ class Board:
                 triangle_to_check[1] = 0
                 self.replace_triangle(normal_index, uses_white_checkers, triangle_to_check)
 
+    def add_checker_to_bar(self, uses_white_checkers: bool):
+        """Agrega una ficha a la barra del tablero.
+
+        Args:
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+        """
+        player_num = 1 if uses_white_checkers else 0
+        self.__board_bar__[player_num] += 1
+        self.__num_checkers_board_player__[player_num] -= 1
+        self.__is_bar_empty__[player_num] = False
+
+    def remove_checker_from_bar(self, uses_white_checkers: bool):
+        """Remueve una ficha de la barra del tablero.
+        Actualiza el estado de la barra si queda vacía.
+
+        Args:
+            uses_white_checkers: Indica si el jugador usa fichas blancas.
+        """
+        player_num = 0 if uses_white_checkers else 1
+        if self.__board_bar__[player_num] > 0:
+            self.__board_bar__[player_num] -= 1
+            if self.__board_bar__[player_num] == 0:
+                self.__is_bar_empty__[player_num] = True
+
     def verify_player_can_take_out(self, uses_white_checkers: bool) -> bool:
         """Verifica si un jugador puede comenzar a retirar sus fichas del tablero.
 
@@ -456,13 +434,14 @@ class Board:
         player_num = 0 if uses_white_checkers else 1
         # Si hay fichas en la barra, no puede retirar
         if self.__board_bar__[player_num] > 0:
-            self.__can_take_out__[player_num] = False
             return False
 
         # Verifica si todas las fichas están en el área de retiro
         total_num_checkers = self.__num_checkers_board_player__[player_num]
         checkers_count = 0
-        for normal_index in range(19, 25):
+        home_start = 19
+        home_end = 25
+        for normal_index in range(home_start, home_end):
             triangle_to_check = self.get_triangle_from_normal(normal_index, uses_white_checkers)
             count_checkers_in_triangle = triangle_to_check[0]
             if count_checkers_in_triangle > 0 and ((uses_white_checkers and triangle_to_check[2] == "●") or
@@ -470,7 +449,6 @@ class Board:
                 checkers_count += count_checkers_in_triangle
         # Si todas las fichas están en el área de retiro, puede comenzar a retirar
         if checkers_count == total_num_checkers:
-            self.__can_take_out__[player_num] = True
             return True
         return False
 
@@ -516,7 +494,9 @@ class Board:
             int: El índice normal (1-24) de la ficha más avanzada.
             Retorna -1 si no hay fichas en el tablero.
         """
-        for normal_index in range(19, 25):
+        home_start = 19
+        home_end = 25
+        for normal_index in range(home_start, home_end):
             triangle_to_check = self.get_triangle_from_normal(normal_index, uses_white_checkers)
             if triangle_to_check[0] > 0 and ((uses_white_checkers and triangle_to_check[2] == "●") or
                                              (not uses_white_checkers and triangle_to_check[2] == "○")):
