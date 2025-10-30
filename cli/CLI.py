@@ -49,6 +49,16 @@ class CLI:
         # Imprime el tablero inferior.
         print(self.generate_bottom_board_str(board_bot_triangles, uses_white_checkers), end="")
 
+    def generate_checkers_off_str(self, uses_white_checkers):
+        off_checkers_num_str = "00"
+        off_checkers_color = "●" if uses_white_checkers else "○"
+        off_checkers_num = self.__board__.checkers_off[0 if uses_white_checkers else 1]
+        if off_checkers_num < 10:
+            off_checkers_num_str = f"0{off_checkers_num}"
+        else:
+            off_checkers_num_str = str(off_checkers_num)
+        return f"{off_checkers_num_str} {off_checkers_color}"
+
     def character_to_put_top(self, line_number: int, triangle: list) -> str:
         """Determina el carácter a colocar
         (ficha normal / espacio en blanco / símbolo de selección)
@@ -86,17 +96,22 @@ class CLI:
             str: Una cadena que representa el tablero superior.
         """
         # Encabezado del tablero superior.
+        off_str = self.generate_checkers_off_str(not uses_white_checkers)
         if uses_white_checkers:
             top_board_str = (
-                "  ───────────────────────────────────────\n"
-                "   c  b  a  9  8  7     6  5  4  3  2  1\n"
+                "                                   ┌──────┐\n"
+                f"                                   │ {off_str} │\n"
+                "  ─────────────────────────────────└──────┘\n"
+                "   C  B  A  9  8  7     6  5  4  3  2  1\n"
                 "┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐\n"
                 "│  ▼  ▼  ▼  ▼  ▼  ▼  │  ▼  ▼  ▼  ▼  ▼  ▼  │\n"
             )
         else:
             top_board_str = (
-                "  ───────────────────────────────────────\n"
-                "   1  2  3  4  5  6     7  8  9  a  b  c\n"
+                "                                   ┌──────┐\n"
+                f"                                   │ {off_str} │\n"
+                "  ─────────────────────────────────└──────┘\n"
+                "   1  2  3  4  5  6     7  8  9  A  B  C\n"
                 "┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐\n"
                 "│  ▼  ▼  ▼  ▼  ▼  ▼  │  ▼  ▼  ▼  ▼  ▼  ▼  │\n"
             )
@@ -195,19 +210,25 @@ class CLI:
         bottom_board_str = "".join(str_tmp_pile)
 
         # Agrega el pie del tablero inferior.
+        off_str = self.generate_checkers_off_str(uses_white_checkers)
         if uses_white_checkers:
             bottom_board_str += (
                 "│  ▲  ▲  ▲  ▲  ▲  ▲  │  ▲  ▲  ▲  ▲  ▲  ▲  │\n"
                 "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
-                "   d  e  f  g  h  i     j  k  l  m  n  o   \n"
-                "  ───────────────────────────────────────\n"
+                "   D  E  F  G  H  I     J  K  L  M  N  O   \n"
+                "  ─────────────────────────────────┌──────┐\n"
+                f"                               <P> │ {off_str} │\n"
+                "                                   └──────┘\n"
+
             )
         else:
             bottom_board_str += (
                 "│  ▲  ▲  ▲  ▲  ▲  ▲  │  ▲  ▲  ▲  ▲  ▲  ▲  │\n"
                 "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
-                "   o  n  m  l  k  j     i  h  g  f  e  d   \n"
-                "  ───────────────────────────────────────\n"
+                "   O  N  M  L  K  J     I  H  G  F  E  D   \n"
+                "  ─────────────────────────────────┌──────┐\n"
+                f"                               <P> │ {off_str} │\n"
+                "                                   └──────┘\n"
             )
 
         return bottom_board_str

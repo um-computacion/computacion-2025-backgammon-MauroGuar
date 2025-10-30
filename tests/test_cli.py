@@ -171,8 +171,10 @@ class TestCLI(unittest.TestCase):
         triangles = [[0, 0, " "]] * 12
         result = self.cli.generate_top_board_str(triangles, True)
         expected = (
-            "  ───────────────────────────────────────\n"
-            "   c  b  a  9  8  7     6  5  4  3  2  1\n"
+            "                                   ┌──────┐\n"
+            "                                   │ 00 ○ │\n"
+            "  ─────────────────────────────────└──────┘\n"
+            "   C  B  A  9  8  7     6  5  4  3  2  1\n"
             "┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐\n"
             "│  ▼  ▼  ▼  ▼  ▼  ▼  │  ▼  ▼  ▼  ▼  ▼  ▼  │\n"
         )
@@ -183,8 +185,10 @@ class TestCLI(unittest.TestCase):
         triangles = [[0, 0, " "]] * 12
         result = self.cli.generate_top_board_str(triangles, False)
         expected = (
-            "  ───────────────────────────────────────\n"
-            "   1  2  3  4  5  6     7  8  9  a  b  c\n"
+            "                                   ┌──────┐\n"
+            "                                   │ 00 ● │\n"
+            "  ─────────────────────────────────└──────┘\n"
+            "   1  2  3  4  5  6     7  8  9  A  B  C\n"
             "┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐\n"
             "│  ▼  ▼  ▼  ▼  ▼  ▼  │  ▼  ▼  ▼  ▼  ▼  ▼  │\n"
         )
@@ -197,8 +201,10 @@ class TestCLI(unittest.TestCase):
         expected = (
             "│  ▲  ▲  ▲  ▲  ▲  ▲  │  ▲  ▲  ▲  ▲  ▲  ▲  │\n"
             "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
-            "   d  e  f  g  h  i     j  k  l  m  n  o   \n"
-            "  ───────────────────────────────────────\n"
+            "   D  E  F  G  H  I     J  K  L  M  N  O   \n"
+            "  ─────────────────────────────────┌──────┐\n"
+            "                               <P> │ 00 ● │\n"
+            "                                   └──────┘\n"
         )
         self.assertEqual(result.strip(), expected.strip())
 
@@ -209,8 +215,10 @@ class TestCLI(unittest.TestCase):
         expected = (
             "│  ▲  ▲  ▲  ▲  ▲  ▲  │  ▲  ▲  ▲  ▲  ▲  ▲  │\n"
             "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
-            "   o  n  m  l  k  j     i  h  g  f  e  d   \n"
-            "  ───────────────────────────────────────\n"
+            "   O  N  M  L  K  J     I  H  G  F  E  D   \n"
+            "  ─────────────────────────────────┌──────┐\n"
+            "                               <P> │ 00 ○ │\n"
+            "                                   └──────┘\n"
         )
         self.assertEqual(result.strip(), expected.strip())
 
@@ -219,8 +227,10 @@ class TestCLI(unittest.TestCase):
         triangles = [[1, 0, "●"]] + [[0, 0, " "]] * 11
         result = self.cli.generate_top_board_str(triangles, True)
         expected = (
-            "  ───────────────────────────────────────\n"
-            "   c  b  a  9  8  7     6  5  4  3  2  1\n"
+            "                                   ┌──────┐\n"
+            "                                   │ 00 ○ │\n"
+            "  ─────────────────────────────────└──────┘\n"
+            "   C  B  A  9  8  7     6  5  4  3  2  1\n"
             "┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐\n"
             "│  ▼  ▼  ▼  ▼  ▼  ▼  │  ▼  ▼  ▼  ▼  ▼  ▼  │\n"
             "│  ●                 │                    │\n"
@@ -235,8 +245,10 @@ class TestCLI(unittest.TestCase):
             "│  ●                 │                    │\n"
             "│  ▲  ▲  ▲  ▲  ▲  ▲  │  ▲  ▲  ▲  ▲  ▲  ▲  │\n"
             "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
-            "   d  e  f  g  h  i     j  k  l  m  n  o   \n"
-            "  ───────────────────────────────────────\n"
+            "   D  E  F  G  H  I     J  K  L  M  N  O   \n"
+            "  ─────────────────────────────────┌──────┐\n"
+            "                               <P> │ 00 ● │\n"
+            "                                   └──────┘\n"
         )
         self.assertEqual(result.strip(), expected.strip())
 
@@ -245,8 +257,10 @@ class TestCLI(unittest.TestCase):
         triangles = [[1, 1, "●"]] + [[0, 0, " "]] * 11
         result = self.cli.generate_top_board_str(triangles, True)
         expected = (
-            "  ───────────────────────────────────────\n"
-            "   c  b  a  9  8  7     6  5  4  3  2  1\n"
+            "                                   ┌──────┐\n"
+            "                                   │ 00 ○ │\n"
+            "  ─────────────────────────────────└──────┘\n"
+            "   C  B  A  9  8  7     6  5  4  3  2  1\n"
             "┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐\n"
             "│  ▼  ▼  ▼  ▼  ▼  ▼  │  ▼  ▼  ▼  ▼  ▼  ▼  │\n"
             "│  ●                 │                    │\n"
@@ -259,8 +273,10 @@ class TestCLI(unittest.TestCase):
         triangles = [[0, 2, " "]] + [[0, 0, " "]] * 11
         result = self.cli.generate_top_board_str(triangles, True)
         expected = (
-            "  ───────────────────────────────────────\n"
-            "   c  b  a  9  8  7     6  5  4  3  2  1\n"
+            "                                   ┌──────┐\n"
+            "                                   │ 00 ○ │\n"
+            "  ─────────────────────────────────└──────┘\n"
+            "   C  B  A  9  8  7     6  5  4  3  2  1\n"
             "┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┐\n"
             "│  ▼  ▼  ▼  ▼  ▼  ▼  │  ▼  ▼  ▼  ▼  ▼  ▼  │\n"
             "│  ⊕                 │                    │\n"
@@ -277,8 +293,10 @@ class TestCLI(unittest.TestCase):
             "│  ⊕                 │                    │\n"
             "│  ▲  ▲  ▲  ▲  ▲  ▲  │  ▲  ▲  ▲  ▲  ▲  ▲  │\n"
             "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
-            "   d  e  f  g  h  i     j  k  l  m  n  o   \n"
-            "  ───────────────────────────────────────\n"
+            "   D  E  F  G  H  I     J  K  L  M  N  O   \n"
+            "  ─────────────────────────────────┌──────┐\n"
+            "                               <P> │ 00 ● │\n"
+            "                                   └──────┘\n"
         )
         self.assertEqual(result.strip(), expected.strip())
 
@@ -287,16 +305,16 @@ class TestCLI(unittest.TestCase):
         triangles = [[100, 0, "●"]] + [[0, 0, " "]] * 11
         result = self.cli.generate_top_board_str(triangles, True)
         lines = result.split('\n')
-        self.assertEqual(len(lines), 105)
+        self.assertEqual(len(lines), 107)
         # Verificar que la primera línea de triángulos contenga "●"
-        self.assertIn("●", lines[4])
+        self.assertIn("●", lines[6])
 
     def test_generate_bottom_board_str_large_count_white(self):
         """Prueba que generate_bottom_board_str maneje correctamente conteos grandes de fichas."""
         triangles = [[100, 0, "●"]] + [[0, 0, " "]] * 11
         result = self.cli.generate_bottom_board_str(triangles, True)
         lines = result.split('\n')
-        self.assertEqual(len(lines), 105)
+        self.assertEqual(len(lines), 107)
         # Verificar que la primera línea de triángulos contenga "●"
         self.assertIn("●", lines[0])
 
@@ -304,7 +322,7 @@ class TestCLI(unittest.TestCase):
         """Prueba que generate_top_board_str funcione con el tablero por defecto para fichas blancas."""
         result = self.cli.generate_top_board_str(self.board.top_board_triangles, True)
         lines = result.split('\n')
-        self.assertEqual(len(lines), 10)
+        self.assertEqual(len(lines), 12)
         self.assertIn("●", result)
         self.assertIn("○", result)
 
@@ -312,7 +330,7 @@ class TestCLI(unittest.TestCase):
         """Prueba que generate_bottom_board_str funcione con el tablero por defecto para fichas blancas."""
         result = self.cli.generate_bottom_board_str(self.board.bot_board_triangles, True)
         lines = result.split('\n')
-        self.assertEqual(len(lines), 10)
+        self.assertEqual(len(lines), 12)
         self.assertIn("●", result)
         self.assertIn("○", result)
 
@@ -320,15 +338,42 @@ class TestCLI(unittest.TestCase):
         """Prueba que generate_top_board_str funcione con el tablero por defecto para fichas negras."""
         result = self.cli.generate_top_board_str(self.board.top_board_triangles, False)
         lines = result.split('\n')
-        self.assertEqual(len(lines), 10)
+        self.assertEqual(len(lines), 12)
         self.assertIn("1  2  3", result)
 
     def test_generate_bottom_board_str_default_black(self):
         """Prueba que generate_bottom_board_str funcione con el tablero por defecto para fichas negras."""
         result = self.cli.generate_bottom_board_str(self.board.bot_board_triangles, False)
         lines = result.split('\n')
-        self.assertEqual(len(lines), 10)
-        self.assertIn("o  n  m", result)
+        self.assertEqual(len(lines), 12)
+
+    def test_generate_checkers_off_str_white_player_black_off_gt_zero(self):
+        """Prueba que generate_checkers_off_str devuelva la cadena correcta para jugador blanco con fichas fuera > 0."""
+        # Manually set checkers_off since it's a property without setter
+        self.board.__checkers_off__ = [5, 0]  # White off: 5, Black off: 0
+        result = self.cli.generate_checkers_off_str(True)
+        self.assertEqual(result, "05 ●")
+
+    def test_generate_checkers_off_str_white_player_black_off_gt_nine(self):
+        """Prueba que generate_checkers_off_str devuelva la cadena correcta para jugador blanco con fichas fuera > 9."""
+        # Manually set checkers_off since it's a property without setter
+        self.board.__checkers_off__ = [15, 0]  # White off: 15, Black off: 0
+        result = self.cli.generate_checkers_off_str(True)
+        self.assertEqual(result, "15 ●")
+
+    def test_generate_checkers_off_str_black_player_black_off_gt_zero(self):
+        """Prueba que generate_checkers_off_str devuelva la cadena correcta para jugador negro con fichas fuera > 0."""
+        # Manually set checkers_off since it's a property without setter
+        self.board.__checkers_off__ = [0, 5]  # White off: 0, Black off: 5
+        result = self.cli.generate_checkers_off_str(False)
+        self.assertEqual(result, "05 ○")
+
+    def test_generate_checkers_off_str_black_player_black_off_gt_nine(self):
+        """Prueba que generate_checkers_off_str devuelva la cadena correcta para jugador negro con fichas fuera > 9."""
+        # Manually set checkers_off since it's a property without setter
+        self.board.__checkers_off__ = [0, 15]  # White off: 0, Black off: 15
+        result = self.cli.generate_checkers_off_str(False)
+        self.assertEqual(result, "15 ○")
 
 
 if __name__ == '__main__':

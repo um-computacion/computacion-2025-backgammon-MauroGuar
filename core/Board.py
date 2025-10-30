@@ -74,6 +74,14 @@ class Board:
         return self.__board_bar__
 
     @property
+    def checkers_off(self) -> list:
+        """Cantidad de fichas retiradas del tablero.
+
+        [fichas blancas, fichas negras]
+        """
+        return self.__checkers_off__
+
+    @property
     def can_take_out(self) -> list:
         """Indica si cada jugador puede comenzar a retirar fichas.
 
