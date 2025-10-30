@@ -35,6 +35,8 @@ class Board:
                 [fichas blancas, fichas negras]
         __can_take_out__: Una lista de booleanos que indica si cada jugador puede comenzar a retirar fichas.
                 [fichas blancas, fichas negras]
+        __off_tray_posible_move__: Una lista que indica si el jugador puede mover una ficha al área de retiro.
+                [fichas blancas, fichas negras]
     """
 
     def __init__(self):
@@ -48,6 +50,7 @@ class Board:
         self.__checkers_off__ = []
         self.__is_bar_empty__ = []
         self.__can_take_out__ = []
+        self.__off_tray_posible_move__ = []
         self.new_game_board()
 
     @property
@@ -89,6 +92,14 @@ class Board:
         """
         return self.__can_take_out__
 
+    @property
+    def off_tray_posible_move(self) -> list:
+        """Indica si el jugador puede mover una ficha al área de retiro.
+
+        [fichas blancas, fichas negras]
+        """
+        return self.__off_tray_posible_move__
+
     def new_game_board(self):
         """Resetea el tablero de juego a un estado inicial por defecto."""
         self.__top_board_triangles__ = [[5, 0, "●"], [0, 0, " "], [0, 0, " "], [0, 0, " "], [3, 0, "○"], [0, 0, " "],
@@ -102,6 +113,7 @@ class Board:
         self.__checkers_off__ = [0, 0]
         self.__is_bar_empty__ = [True, True]
         self.__can_take_out__ = [False, False]
+        self.__off_tray_posible_move__ = [False, False]
 
     @staticmethod
     def map_normal_index(normal_index: int, uses_white_checkers: bool) -> tuple[bool, int]:
@@ -378,34 +390,60 @@ class Board:
         # Si el triángulo tiene fichas del mismo color, se puede mover la ficha
         if selected_triangle[0] > 0 and ((uses_white_checkers and selected_triangle[2] == "●") or
                                          (not uses_white_checkers and selected_triangle[2] == "○")):
-            # Actualiza el estado de la variable de ficha seleccionada
-            self.__selected_checker__ = normal_index
+            # Obtiene los movimientos posibles para la ficha seleccionada
+            posible_moves = self.get_possible_moves(normal_index, uses_white_checkers)
+            # Si hay movimientos posibles, selecciona la ficha
+            if posible_moves:
+                # Si hay un movimiento posible para retirar la ficha, actualiza el estado
+                if 25 in posible_moves:
+                    self.__off_tray_posible_move__[0 if uses_white_checkers else 1] = True
+                else:
+                    self.__off_tray_posible_move__[0 if uses_white_checkers else 1] = False
 
-            # Marca la ficha en el tablero como seleccionada
-            # (1 = Resaltador de ficha seleccionada)
-            selected_triangle[1] = 1
-            self.replace_triangle(normal_index, uses_white_checkers, selected_triangle)
-            return True
+                # Actualiza el estado de la variable de ficha seleccionada
+                self.__selected_checker__ = normal_index
+                # Marca la ficha en el tablero como seleccionada
+                # (1 = Resaltador de ficha seleccionada)
+                selected_triangle[1] = 1
+                self.replace_triangle(normal_index, uses_white_checkers, selected_triangle)
+
+                # Marca los movimientos posibles en el tablero
+                for move in posible_moves:
+                    if move != 25:
+                        possible_move_triangle = self.get_triangle_from_normal(move, uses_white_checkers)
+                        possible_move_triangle[1] = 2  # (2 = Posible movimiento)
+                        self.replace_triangle(move, uses_white_checkers, possible_move_triangle)
+
+                return True
         return False
 
-    def deselect_checker(self, uses_white_checkers: bool) -> bool:
+    def deselect_checker(self, uses_white_checkers: bool):
         """Verifica si el triángulo marcado como seleccionado lo está para el jugador.
         Si es así, lo deselecciona.
+        Además, limpia todas las marcas de posibles movimientos en el tablero.
 
         Args:
             uses_white_checkers: Indica si el jugador usa fichas blancas.
-        Returns:
-            bool: True si se deseleccionó el triángulo, False en caso contrario.
         """
-        if self.__selected_checker__ is None:
-            return False
-        selected_triangle = self.get_triangle_from_normal(self.__selected_checker__, uses_white_checkers)
-        if selected_triangle[1] == 1:
-            selected_triangle[1] = 0
-            self.replace_triangle(self.__selected_checker__, uses_white_checkers, selected_triangle)
-            self.__selected_checker__ = None
-            return True
-        return False
+        # Si hay una ficha seleccionada la deselecciona
+        if self.__selected_checker__ is not None:
+            # Obtiene el triángulo seleccionado
+            selected_triangle = self.get_triangle_from_normal(self.__selected_checker__, uses_white_checkers)
+            # Si el triángulo está marcado como seleccionado para el jugador, lo deselecciona
+            if selected_triangle[1] == 1:
+                selected_triangle[1] = 0
+                self.replace_triangle(self.__selected_checker__, uses_white_checkers, selected_triangle)
+                self.__selected_checker__ = None
+
+        # Quita como posible movimiento el retiro de ficha
+        self.__off_tray_posible_move__ = [False, False]
+
+        # Limpia todas las marcas de posibles movimientos en el tablero
+        for normal_index in range(1, 25):
+            triangle_to_check = self.get_triangle_from_normal(normal_index, uses_white_checkers)
+            if triangle_to_check[1] == 2:
+                triangle_to_check[1] = 0
+                self.replace_triangle(normal_index, uses_white_checkers, triangle_to_check)
 
     def verify_player_can_take_out(self, uses_white_checkers: bool) -> bool:
         """Verifica si un jugador puede comenzar a retirar sus fichas del tablero.
@@ -436,24 +474,6 @@ class Board:
             return True
         return False
 
-    def clean_selection(self, triangles_deselect_normal: tuple[int], uses_white_checkers: bool):
-        """Deselecciona múltiples triángulos en el tablero de juego.
-
-        No realiza ninguna verificación de validez.
-        Ya debe haberse verificado previamente.
-
-        Args:
-            triangles_deselect_normal: Una tupla de índices normales (1-24) de los triángulos a deseleccionar.
-            uses_white_checkers: Indica si el jugador usa fichas blancas.
-        """
-        # Itera sobre los triángulos a deseleccionar
-        for normal_index in triangles_deselect_normal:
-            # Obtiene el triángulo a partir del índice normal
-            triangle_to_deselect = self.get_triangle_from_normal(normal_index, uses_white_checkers)
-            # Deselecciona el triángulo (0 = Ninguna selección)
-            triangle_to_deselect[1] = 0
-            self.replace_triangle(normal_index, uses_white_checkers, triangle_to_deselect)
-
     def take_out_checker(self, normal_index: int, uses_white_checkers: bool):
         """Retira una ficha del tablero de juego.
 
@@ -480,6 +500,7 @@ class Board:
             tuple: Un par de booleanos que indican si alguien ganó (primer booleano)
             y si el jugador de fichas blancas ganó (segundo booleano).
         """
+        # Verifica si algún jugador ha retirado todas sus fichas
         if self.__checkers_off__[0] >= self.__num_checkers_total__:
             return True, True
         if self.__checkers_off__[1] >= self.__num_checkers_total__:

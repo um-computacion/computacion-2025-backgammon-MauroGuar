@@ -211,13 +211,14 @@ class CLI:
 
         # Agrega el pie del tablero inferior.
         off_str = self.generate_checkers_off_str(uses_white_checkers)
+        off_possible_move = "P 🡺" if self.__board__.off_tray_posible_move[0 if uses_white_checkers else 1] else "   "
         if uses_white_checkers:
             bottom_board_str += (
                 "│  ▲  ▲  ▲  ▲  ▲  ▲  │  ▲  ▲  ▲  ▲  ▲  ▲  │\n"
                 "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
                 "   D  E  F  G  H  I     J  K  L  M  N  O   \n"
                 "  ─────────────────────────────────┌──────┐\n"
-                f"                               <P> │ {off_str} │\n"
+                f"                               {off_possible_move} │ {off_str} │\n"
                 "                                   └──────┘\n"
 
             )
@@ -227,7 +228,7 @@ class CLI:
                 "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
                 "   O  N  M  L  K  J     I  H  G  F  E  D   \n"
                 "  ─────────────────────────────────┌──────┐\n"
-                f"                               <P> │ {off_str} │\n"
+                f"                               {off_possible_move} │ {off_str} │\n"
                 "                                   └──────┘\n"
             )
 
@@ -277,10 +278,13 @@ class CLI:
         Returns:
             int: El índice del triángulo seleccionado (1-25) o -1 si la entrada es inválida.
         """
-        # Carácteres permitidos para seleccionar triángulos.
-        allowed_inputs = tuple("123456789abcdefghijklmnop")
+        allowed_inputs = list("ABCDEFGHIJKLMNOP") + [str(i) for i in range(1, 26)]
 
         # Verifica si la entrada del usuario es válida.
-        if user_input.lower() in allowed_inputs and len(user_input) == 1:
-            return allowed_inputs.index(user_input.lower()) + 1
+        user_input = user_input.strip().upper()
+        if user_input in allowed_inputs:
+            if user_input.isdigit():
+                return int(user_input)
+            else:
+                return allowed_inputs.index(user_input) + 10
         return -1

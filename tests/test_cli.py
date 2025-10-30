@@ -11,15 +11,21 @@ class TestCLI(unittest.TestCase):
         self.board = Board()
         self.cli = CLI(self.board)
 
-    def test_translate_user_input_select_allowed_inpt(self):
+    def test_translate_user_input_select_allowed_inpt_single_char(self):
         """Prueba la función translate_user_input_select con entradas válidas."""
         inpt_to_test = tuple("123456789abcdefghijklmnop")
         for i, char in enumerate(inpt_to_test):
             self.assertEqual(self.cli.translate_user_input_select(char), i + 1)
 
+    def test_translate_user_input_select_allowed_inpt_multi_char(self):
+        """Prueba la función translate_user_input_select con entradas válidas de múltiples caracteres."""
+        inpt_to_test = ("10", "11", "12", "13", "14", "15", "16")
+        for i, char in enumerate(inpt_to_test):
+            self.assertEqual(self.cli.translate_user_input_select(char), i + 10)
+
     def test_translate_user_input_select_not_allowed_inpt(self):
         """Prueba la función translate_user_input_select con entradas no válidas."""
-        inpt_to_test = ("0", "!", "z", "", " ", "\n", "12", "aB", "a1")
+        inpt_to_test = ("0", "!", "z", "", " ", "\n", "aB", "a1")
         for char in inpt_to_test:
             self.assertEqual(self.cli.translate_user_input_select(char), -1)
 
@@ -203,7 +209,7 @@ class TestCLI(unittest.TestCase):
             "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
             "   D  E  F  G  H  I     J  K  L  M  N  O   \n"
             "  ─────────────────────────────────┌──────┐\n"
-            "                               <P> │ 00 ● │\n"
+            "                                   │ 00 ● │\n"
             "                                   └──────┘\n"
         )
         self.assertEqual(result.strip(), expected.strip())
@@ -217,7 +223,7 @@ class TestCLI(unittest.TestCase):
             "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
             "   O  N  M  L  K  J     I  H  G  F  E  D   \n"
             "  ─────────────────────────────────┌──────┐\n"
-            "                               <P> │ 00 ○ │\n"
+            "                                   │ 00 ○ │\n"
             "                                   └──────┘\n"
         )
         self.assertEqual(result.strip(), expected.strip())
@@ -247,7 +253,7 @@ class TestCLI(unittest.TestCase):
             "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
             "   D  E  F  G  H  I     J  K  L  M  N  O   \n"
             "  ─────────────────────────────────┌──────┐\n"
-            "                               <P> │ 00 ● │\n"
+            "                                   │ 00 ● │\n"
             "                                   └──────┘\n"
         )
         self.assertEqual(result.strip(), expected.strip())
@@ -311,7 +317,39 @@ class TestCLI(unittest.TestCase):
             "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
             "   D  E  F  G  H  I     J  K  L  M  N  O   \n"
             "  ─────────────────────────────────┌──────┐\n"
-            "                               <P> │ 00 ● │\n"
+            "                                   │ 00 ● │\n"
+            "                                   └──────┘\n"
+        )
+        self.assertEqual(result.strip(), expected.strip())
+
+    def test_generate_bottom_board_str_possible_off_tray_white(self):
+        """Prueba que generate_bottom_board_str maneje correctamente el caso de cuando se
+        puede mover hacia fuera del tablero para jugador blanco"""
+        triangles = [[0, 0, " "]] * 12
+        self.board.__off_tray_posible_move__ = [True, False]
+        result = self.cli.generate_bottom_board_str(triangles, True)
+        expected = (
+            "│  ▲  ▲  ▲  ▲  ▲  ▲  │  ▲  ▲  ▲  ▲  ▲  ▲  │\n"
+            "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
+            "   D  E  F  G  H  I     J  K  L  M  N  O   \n"
+            "  ─────────────────────────────────┌──────┐\n"
+            "                               P 🡺 │ 00 ● │\n"
+            "                                   └──────┘\n"
+        )
+        self.assertEqual(result.strip(), expected.strip())
+
+    def test_generate_bottom_board_str_possible_off_tray_black(self):
+        """Prueba que generate_bottom_board_str maneje correctamente el caso de cuando se
+        puede mover hacia fuera del tablero para jugador negro"""
+        triangles = [[0, 0, " "]] * 12
+        self.board.__off_tray_posible_move__ = [False, True]
+        result = self.cli.generate_bottom_board_str(triangles, False)
+        expected = (
+            "│  ▲  ▲  ▲  ▲  ▲  ▲  │  ▲  ▲  ▲  ▲  ▲  ▲  │\n"
+            "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
+            "   O  N  M  L  K  J     I  H  G  F  E  D   \n"
+            "  ─────────────────────────────────┌──────┐\n"
+            "                               P 🡺 │ 00 ○ │\n"
             "                                   └──────┘\n"
         )
         self.assertEqual(result.strip(), expected.strip())
