@@ -25,6 +25,7 @@ class Board:
         __bot_board_triangles__: Una lista que contiene los triángulos inferiores.
         __num_checkers_board_player__: Una lista con la cantidad total de fichas en el tablero por jugador.
                 [fichas blancas, fichas negras]
+        __num_checkers_total__: La cantidad total de fichas por jugador (15).
         __selected_checker__: El índice normal (1-24) de la ficha seleccionada actualmente, o None si ninguna.
         __board_bar__: Una lista que contiene la cantidad de fichas en la barra.
                 [fichas blancas, fichas negras]
@@ -41,6 +42,7 @@ class Board:
         self.__top_board_triangles__ = []
         self.__bot_board_triangles__ = []
         self.__num_checkers_board_player__ = []
+        self.__num_checkers_total__ = 15
         self.__selected_checker__ = None
         self.__board_bar__ = []
         self.__checkers_off__ = []
@@ -230,6 +232,7 @@ class Board:
         dest_triangle = self.get_triangle_from_normal(normal_dest, uses_white_checkers)
 
         # Realiza el movimiento
+
         # Disminuye el conteo en el triángulo de origen
         # y actualiza el símbolo si es necesario
         origin_triangle[0] -= 1
@@ -253,10 +256,7 @@ class Board:
         # simplemente se aumenta el conteo y se actualiza el símbolo si es necesario
         else:
             dest_triangle[0] += 1
-            if uses_white_checkers:
-                dest_triangle[2] = "●"
-            else:
-                dest_triangle[2] = "○"
+            dest_triangle[2] = "●" if uses_white_checkers else "○"
 
         self.replace_multiple_triangles([(normal_origin, origin_triangle), (normal_dest, dest_triangle)],
                                         uses_white_checkers)
@@ -312,10 +312,21 @@ class Board:
             if objective_triangle_normal <= 24:
                 if self.verify_checker_placement(objective_triangle_normal, uses_white_checkers):
                     movements_possible.append(objective_triangle_normal)
+
             # Si el movimiento excede el rango del tablero,
-            # significa que la ficha puede ser retirada
-            elif objective_triangle_normal == 25:
-                movements_possible.append(25)
+            # verifica si se puede retirar la ficha
+            else:
+                self.verify_player_can_take_out(uses_white_checkers)
+                if self.__can_take_out__[0 if uses_white_checkers else 1]:
+                    # Si el movimiento está exactamente a la distancia para retirar
+                    # la ficha, la agrega como posible retiro
+                    if objective_triangle_normal == 25:
+                        movements_possible.append(25)
+                    # Si el movimiento excede la distancia para retirar la ficha,
+                    # verifica si la ficha está por delante de la ficha más avanzada
+                    elif objective_triangle_normal > 25 and selected_checker_normal > self.get_most_advanced_checker(
+                            uses_white_checkers):
+                        movements_possible.append(25)
 
         # Retorna una tupla de movimientos posibles
         return tuple(movements_possible)
@@ -326,14 +337,10 @@ class Board:
         Args:
             uses_white_checkers: Indica si el jugador usa fichas blancas.
         """
-        if uses_white_checkers:
-            self.__board_bar__[1] += 1
-            self.__num_checkers_board_player__[1] -= 1
-            self.__is_bar_empty__[1] = False
-        else:
-            self.__board_bar__[0] += 1
-            self.__num_checkers_board_player__[0] -= 1
-            self.__is_bar_empty__[0] = False
+        player_num = 1 if uses_white_checkers else 0
+        self.__board_bar__[player_num] += 1
+        self.__num_checkers_board_player__[player_num] -= 1
+        self.__is_bar_empty__[player_num] = False
 
     def remove_checker_from_bar(self, uses_white_checkers: bool):
         """Remueve una ficha de la barra del tablero.
@@ -342,16 +349,11 @@ class Board:
         Args:
             uses_white_checkers: Indica si el jugador usa fichas blancas.
         """
-        if uses_white_checkers:
-            if self.__board_bar__[0] > 0:
-                self.__board_bar__[0] -= 1
-            if self.__board_bar__[0] == 0:
-                self.__is_bar_empty__[0] = True
-        else:
-            if self.__board_bar__[1] > 0:
-                self.__board_bar__[1] -= 1
-            if self.__board_bar__[1] == 0:
-                self.__is_bar_empty__[1] = True
+        player_num = 0 if uses_white_checkers else 1
+        if self.__board_bar__[player_num] > 0:
+            self.__board_bar__[player_num] -= 1
+            if self.__board_bar__[player_num] == 0:
+                self.__is_bar_empty__[player_num] = True
 
     def select_checker(self, normal_index: int, uses_white_checkers: bool) -> bool:
         """Selecciona una ficha en un triángulo específico si es movible.
@@ -397,16 +399,22 @@ class Board:
             return True
         return False
 
-    def verify_player_can_take_out(self, uses_white_checkers: bool):
+    def verify_player_can_take_out(self, uses_white_checkers: bool) -> bool:
         """Verifica si un jugador puede comenzar a retirar sus fichas del tablero.
 
         Args:
             uses_white_checkers: Indica si el jugador usa fichas blancas.
+        Returns:
+            bool: True si el jugador puede comenzar a retirar fichas, False en caso contrario.
         """
-        if uses_white_checkers:
-            total_num_checkers = self.__num_checkers_board_player__[0]
-        else:
-            total_num_checkers = self.__num_checkers_board_player__[1]
+        player_num = 0 if uses_white_checkers else 1
+        # Si hay fichas en la barra, no puede retirar
+        if self.__board_bar__[player_num] > 0:
+            self.__can_take_out__[player_num] = False
+            return False
+
+        # Verifica si todas las fichas están en el área de retiro
+        total_num_checkers = self.__num_checkers_board_player__[player_num]
         checkers_count = 0
         for normal_index in range(19, 25):
             triangle_to_check = self.get_triangle_from_normal(normal_index, uses_white_checkers)
@@ -414,11 +422,11 @@ class Board:
             if count_checkers_in_triangle > 0 and ((uses_white_checkers and triangle_to_check[2] == "●") or
                                                    (not uses_white_checkers and triangle_to_check[2] == "○")):
                 checkers_count += count_checkers_in_triangle
+        # Si todas las fichas están en el área de retiro, puede comenzar a retirar
         if checkers_count == total_num_checkers:
-            if uses_white_checkers:
-                self.__can_take_out__[0] = True
-            else:
-                self.__can_take_out__[1] = True
+            self.__can_take_out__[player_num] = True
+            return True
+        return False
 
     def clean_selection(self, triangles_deselect_normal: tuple[int], uses_white_checkers: bool):
         """Deselecciona múltiples triángulos en el tablero de juego.
@@ -438,18 +446,24 @@ class Board:
             triangle_to_deselect[1] = 0
             self.replace_triangle(normal_index, uses_white_checkers, triangle_to_deselect)
 
-    def take_out_checker(self, uses_white_checkers: bool):
+    def take_out_checker(self, normal_index: int, uses_white_checkers: bool):
         """Retira una ficha del tablero de juego.
 
         Args:
             uses_white_checkers: Indica si el jugador usa fichas blancas.
         """
-        if uses_white_checkers:
-            self.__checkers_off__[0] += 1
-            self.__num_checkers_board_player__[0] -= 1
-        else:
-            self.__checkers_off__[1] += 1
-            self.__num_checkers_board_player__[1] -= 1
+        origin_triangle = self.get_triangle_from_normal(normal_index, uses_white_checkers)
+        # Disminuye el conteo en el triángulo de origen
+        # y actualiza el símbolo si es necesario
+        origin_triangle[0] -= 1
+        if origin_triangle[0] == 0:
+            origin_triangle[2] = " "
+        self.replace_triangle(normal_index, uses_white_checkers, origin_triangle)
+
+        # Actualiza el conteo de fichas retiradas
+        player_num = 0 if uses_white_checkers else 1
+        self.__checkers_off__[player_num] += 1
+        self.__num_checkers_board_player__[player_num] -= 1
 
     def is_match_won(self) -> tuple[bool, bool]:
         """Verifica si algún jugador ha ganado la partida.
@@ -458,22 +472,24 @@ class Board:
             tuple: Un par de booleanos que indican si alguien ganó (primer booleano)
             y si el jugador de fichas blancas ganó (segundo booleano).
         """
-        if self.__checkers_off__[0] >= 15:
+        if self.__checkers_off__[0] >= self.__num_checkers_total__:
             return True, True
-        if self.__checkers_off__[1] >= 15:
+        if self.__checkers_off__[1] >= self.__num_checkers_total__:
             return True, False
         return False, False
 
-    def get_total_num_checkers_player(self, uses_white_checkers: bool) -> int:
-        """Obtiene la cantidad total de fichas de un jugador,
-        incluyendo las fichas en el tablero, barra y las retiradas.
+    def get_most_advanced_checker(self, uses_white_checkers: bool) -> int:
+        """Obtiene el índice normal de la ficha más avanzada en el tablero para un jugador.
 
         Args:
             uses_white_checkers: Indica si el jugador usa fichas blancas.
         Returns:
-            int: La cantidad total de fichas del jugador en el tablero.
+            int: El índice normal (1-24) de la ficha más avanzada.
+            Retorna -1 si no hay fichas en el tablero.
         """
-        if uses_white_checkers:
-            return self.__num_checkers_board_player__[0] + self.__board_bar__[0] + self.__checkers_off__[0]
-        else:
-            return self.__num_checkers_board_player__[1] + self.__board_bar__[1] + self.__checkers_off__[1]
+        for normal_index in range(19, 25):
+            triangle_to_check = self.get_triangle_from_normal(normal_index, uses_white_checkers)
+            if triangle_to_check[0] > 0 and ((uses_white_checkers and triangle_to_check[2] == "●") or
+                                             (not uses_white_checkers and triangle_to_check[2] == "○")):
+                return normal_index
+        return -1

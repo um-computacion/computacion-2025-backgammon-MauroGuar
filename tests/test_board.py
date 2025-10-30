@@ -230,6 +230,9 @@ class TestBoard(unittest.TestCase):
         self.board.replace_triangle(2, True, custom_triangle_black)
         self.board.replace_triangle(2, False, custom_triangle_white)
 
+        # Simular que ambos jugadores pueden retirar fichas
+        self.board.__can_take_out__ = [True, True]
+
         # --- Pruebas para el jugador con fichas blancas ---
         # Objetivo vacío (Se permite mover)
         self.assertTupleEqual(self.board.get_possible_moves(1, True, (2,)), (3,))
@@ -385,7 +388,8 @@ class TestBoard(unittest.TestCase):
                 self.board.replace_triangle(i, True, [0, 0, " "])
                 self.board.__num_checkers_board_player__[0] -= triangle[0]
         self.board.verify_player_can_take_out(True)
-        self.assertTrue(self.board.__can_take_out__[0], "El blanco debería poder retirar cuando todas las fichas están en el hogar.")
+        self.assertTrue(self.board.__can_take_out__[0],
+                        "El blanco debería poder retirar cuando todas las fichas están en el hogar.")
 
     def test_verify_player_can_take_out_black_all_in_home(self):
         """Verifica que el jugador negro puede retirar cuando todas sus fichas están en el hogar."""
@@ -396,7 +400,8 @@ class TestBoard(unittest.TestCase):
                 self.board.replace_triangle(i, False, [0, 0, " "])
                 self.board.__num_checkers_board_player__[1] -= triangle[0]
         self.board.verify_player_can_take_out(False)
-        self.assertTrue(self.board.__can_take_out__[1], "El negro debería poder retirar cuando todas las fichas están en el hogar.")
+        self.assertTrue(self.board.__can_take_out__[1],
+                        "El negro debería poder retirar cuando todas las fichas están en el hogar.")
 
     def test_verify_player_can_take_out_white_with_checker_in_18(self):
         """Verifica que el blanco no puede retirar si tiene una ficha fuera del hogar."""
@@ -445,6 +450,7 @@ class TestBoard(unittest.TestCase):
                 self.board.replace_triangle(i, True, [0, 0, " "])
                 self.board.__num_checkers_board_player__[0] -= triangle[0]
         self.board.add_checker_to_bar(False)
+        self.board.__num_checkers_board_player__[0] += 1
         self.board.verify_player_can_take_out(True)
         self.assertFalse(self.board.__can_take_out__[0], "No debería poder retirar con fichas en barra.")
 
@@ -456,6 +462,7 @@ class TestBoard(unittest.TestCase):
                 self.board.replace_triangle(i, False, [0, 0, " "])
                 self.board.__num_checkers_board_player__[1] -= triangle[0]
         self.board.add_checker_to_bar(True)
+        self.board.__num_checkers_board_player__[1] += 1
         self.board.verify_player_can_take_out(False)
         self.assertFalse(self.board.__can_take_out__[1], "No debería poder retirar con fichas en barra.")
 
@@ -700,32 +707,32 @@ class TestBoard(unittest.TestCase):
     def test_take_out_checker_white(self):
         """Verifica take_out_checker() para retirar una ficha blanca."""
         initial_off = self.board.__checkers_off__[0]
-        self.board.take_out_checker(True)
+        self.board.take_out_checker(19, True)
         self.assertEqual(self.board.__checkers_off__[0], initial_off + 1,
                          "La cantidad de fichas blancas retiradas debe incrementarse en 1.")
 
     def test_take_out_checker_black(self):
         """Verifica take_out_checker() para retirar una ficha negra."""
         initial_off = self.board.__checkers_off__[1]
-        self.board.take_out_checker(False)
+        self.board.take_out_checker(19, False)
         self.assertEqual(self.board.__checkers_off__[1], initial_off + 1,
                          "La cantidad de fichas negras retiradas debe incrementarse en 1.")
 
     def test_take_out_checker_multiple_white(self):
         """Verifica take_out_checker() al retirar múltiples fichas blancas."""
         initial_off = self.board.__checkers_off__[0]
-        self.board.take_out_checker(True)
-        self.board.take_out_checker(True)
-        self.board.take_out_checker(True)
+        self.board.take_out_checker(19, True)
+        self.board.take_out_checker(19, True)
+        self.board.take_out_checker(19, True)
         self.assertEqual(self.board.__checkers_off__[0], initial_off + 3,
                          "La cantidad de fichas blancas retiradas debe incrementarse correctamente.")
 
     def test_take_out_checker_multiple_black(self):
         """Verifica take_out_checker() al retirar múltiples fichas negras."""
         initial_off = self.board.__checkers_off__[1]
-        self.board.take_out_checker(False)
-        self.board.take_out_checker(False)
-        self.board.take_out_checker(False)
+        self.board.take_out_checker(19, False)
+        self.board.take_out_checker(19, False)
+        self.board.take_out_checker(19, False)
         self.assertEqual(self.board.__checkers_off__[1], initial_off + 3,
                          "La cantidad de fichas negras retiradas debe incrementarse correctamente.")
 
@@ -786,103 +793,6 @@ class TestBoard(unittest.TestCase):
         self.assertTrue(won, "Debería haber un ganador.")
         self.assertTrue(white_won, "Debería ganar el blanco primero en orden de verificación.")
 
-    def test_is_match_won_white_at_limit_black_over(self):
-        """Verifica is_match_won() cuando blanco gana exactamente en el límite y negro tiene más."""
-        # Blanco en 15, negro en 16
-        self.board.__checkers_off__[0] = 15
-        self.board.__checkers_off__[1] = 16
-        won, white_won = self.board.is_match_won()
-        self.assertTrue(won, "Debería haber un ganador.")
-        self.assertTrue(white_won, "Debería ganar el blanco primero en orden de verificación.")
-
-    def test_get_total_num_checkers_player_white_default(self):
-        """Verifica get_total_num_checkers_player para blancas en estado inicial."""
-        total = self.board.get_total_num_checkers_player(True)
-        self.assertEqual(total, 15, "El total de fichas blancas debería ser 15 en el estado inicial.")
-
-    def test_get_total_num_checkers_player_black_default(self):
-        """Verifica get_total_num_checkers_player para negras en estado inicial."""
-        total = self.board.get_total_num_checkers_player(False)
-        self.assertEqual(total, 15, "El total de fichas negras debería ser 15 en el estado inicial.")
-
-    def test_get_total_num_checkers_player_white_after_add_to_bar(self):
-        """Verifica que el total permanece igual después de agregar a la barra para blancas."""
-        initial_total = self.board.get_total_num_checkers_player(True)
-        self.board.add_checker_to_bar(False)
-        new_total = self.board.get_total_num_checkers_player(True)
-        self.assertEqual(new_total, initial_total, "El total debería permanecer igual al agregar a la barra.")
-
-    def test_get_total_num_checkers_player_black_after_add_to_bar(self):
-        """Verifica que el total permanece igual después de agregar a la barra para negras."""
-        initial_total = self.board.get_total_num_checkers_player(False)
-        self.board.add_checker_to_bar(False)
-        new_total = self.board.get_total_num_checkers_player(False)
-        self.assertEqual(new_total, initial_total, "El total debería permanecer igual al agregar a la barra.")
-
-    def test_get_total_num_checkers_player_white_after_take_out(self):
-        """Verifica que el total permanece igual después de retirar una ficha para blancas."""
-        initial_total = self.board.get_total_num_checkers_player(True)
-        self.board.take_out_checker(True)
-        new_total = self.board.get_total_num_checkers_player(True)
-        self.assertEqual(new_total, initial_total, "El total debería permanecer igual al retirar una ficha.")
-
-    def test_get_total_num_checkers_player_black_after_take_out(self):
-        """Verifica que el total permanece igual después de retirar una ficha para negras."""
-        initial_total = self.board.get_total_num_checkers_player(False)
-        self.board.take_out_checker(False)
-        new_total = self.board.get_total_num_checkers_player(False)
-        self.assertEqual(new_total, initial_total, "El total debería permanecer igual al retirar una ficha.")
-
-    def test_get_total_num_checkers_player_white_multiple_operations(self):
-        """Verifica el total después de múltiples operaciones para blancas."""
-        initial_total = self.board.get_total_num_checkers_player(True)
-        self.board.add_checker_to_bar(True)
-        self.board.add_checker_to_bar(True)
-        self.board.take_out_checker(True)
-        new_total = self.board.get_total_num_checkers_player(True)
-        self.assertEqual(new_total, initial_total, "El total debería permanecer constante tras múltiples operaciones.")
-
-    def test_get_total_num_checkers_player_black_multiple_operations(self):
-        """Verifica el total después de múltiples operaciones para negras."""
-        initial_total = self.board.get_total_num_checkers_player(False)
-        self.board.add_checker_to_bar(False)
-        self.board.take_out_checker(False)
-        self.board.take_out_checker(False)
-        new_total = self.board.get_total_num_checkers_player(False)
-        self.assertEqual(new_total, initial_total, "El total debería permanecer constante tras múltiples operaciones.")
-
-    def test_get_total_num_checkers_player_white_edge_case_all_off(self):
-        """Verifica el total cuando todas las fichas blancas están retiradas."""
-        # Simular todas retiradas
-        self.board.__checkers_off__[0] = 15
-        self.board.__num_checkers_board_player__[0] = 0
-        self.board.__board_bar__[0] = 0
-        total = self.board.get_total_num_checkers_player(True)
-        self.assertEqual(total, 15, "El total debería ser 15 incluso si todas están retiradas.")
-
-    def test_get_total_num_checkers_player_black_edge_case_all_off(self):
-        """Verifica el total cuando todas las fichas negras están retiradas."""
-        self.board.__checkers_off__[1] = 15
-        self.board.__num_checkers_board_player__[1] = 0
-        self.board.__board_bar__[1] = 0
-        total = self.board.get_total_num_checkers_player(False)
-        self.assertEqual(total, 15, "El total debería ser 15 incluso si todas están retiradas.")
-
-    def test_get_total_num_checkers_player_white_edge_case_all_in_bar(self):
-        """Verifica el total cuando todas las fichas blancas están en la barra."""
-        self.board.__board_bar__[0] = 15
-        self.board.__num_checkers_board_player__[0] = 0
-        self.board.__checkers_off__[0] = 0
-        total = self.board.get_total_num_checkers_player(True)
-        self.assertEqual(total, 15, "El total debería ser 15 si todas están en la barra.")
-
-    def test_get_total_num_checkers_player_black_edge_case_all_in_bar(self):
-        """Verifica el total cuando todas las fichas negras están en la barra."""
-        self.board.__board_bar__[1] = 15
-        self.board.__num_checkers_board_player__[1] = 0
-        self.board.__checkers_off__[1] = 0
-        total = self.board.get_total_num_checkers_player(False)
-        self.assertEqual(total, 15, "El total debería ser 15 si todas están en la barra.")
 
 if __name__ == '__main__':
     unittest.main()

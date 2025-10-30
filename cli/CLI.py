@@ -34,14 +34,14 @@ class CLI:
         """
         board_top_triangles = self.__board__.top_board_triangles
         board_bot_triangles = self.__board__.bot_board_triangles
-        
+
         # Si el jugador actual no usa fichas blancas,
         # se invierten los triángulos para que la perspectiva sea correcta.
         if not uses_white_checkers:
             tmp_top_triangles = board_top_triangles.copy()
             board_top_triangles = list(reversed(board_bot_triangles))
             board_bot_triangles = list(reversed(tmp_top_triangles))
-            
+
         # Imprime el tablero superior.
         print(self.generate_top_board_str(board_top_triangles, uses_white_checkers), end="")
         # Imprimir el tablero medio.
@@ -211,7 +211,7 @@ class CLI:
             )
 
         return bottom_board_str
-    
+
     def generate_middle_board(self) -> str:
         """Genera la representación en cadena del tablero medio.
         
@@ -220,37 +220,33 @@ class CLI:
         """
         # Obtiene la cantidad de fichas en la barra para ambos jugadores.
         white_check_num, black_check_num = self.__board__.board_bar
-        
+
         # Genera la cadena del tablero medio con espacios en blanco por defecto.
         middle_board_str = ("│                    │                    │\n"
                             "│                    │                    │\n"
                             "│                    │                    │\n"
                             )
-        
+
         # Si hay fichas en la barra, actualiza la cadena del tablero medio
         # para mostrar la cantidad de fichas.
         if white_check_num != 0 or black_check_num != 0:
-            
             # Calcula la cantidad de dígitos en los números de fichas
             white_check_digit_num = len(str(white_check_num))
             black_check_digit_num = len(str(black_check_num))
-            
+
             # Calcula la cantidad de espacios necesarios para alinear los números.
             white_space_num = 15 - white_check_digit_num
             black_space_num = 15 - black_check_digit_num
-            
+
             # Genera la cadena del tablero medio con los números de fichas alineados.
             middle_board_str = ("│                    │                    │\n"
                                 f"│{' ' * black_space_num}{black_check_num} ↠ ○ │"
                                 f" ● ↞ {white_check_num}{' ' * white_space_num}│\n"
                                 "│                    │                    │\n"
                                 )
-        
+
         return middle_board_str
-        
-        
-    
-    
+
     @staticmethod
     def translate_user_input_select(user_input: str) -> int:
         """Traduce la entrada del usuario para seleccionar un triángulo.
@@ -258,10 +254,10 @@ class CLI:
         Args:
             user_input: La entrada del usuario como cadena.
         Returns:
-            int: El índice del triángulo seleccionado (1-24) o -1 si la entrada es inválida.
+            int: El índice del triángulo seleccionado (1-25) o -1 si la entrada es inválida.
         """
         # Carácteres permitidos para seleccionar triángulos.
-        allowed_inputs = tuple("123456789abcdefghijklmno")
+        allowed_inputs = tuple("123456789abcdefghijklmnop")
 
         # Verifica si la entrada del usuario es válida.
         if user_input.lower() in allowed_inputs and len(user_input) == 1:
