@@ -1,4 +1,6 @@
 from core.Board import Board
+from core.Dice import Dice
+from core.InputType import InputType
 
 
 class CLI:
@@ -26,6 +28,39 @@ class CLI:
         """
         self.__board__ = board
 
+    def refresh_cli(self, uses_white_checkers: bool, dices: tuple[Dice, ...] | None, twin_dice: bool):
+        self.print_board(uses_white_checkers)
+        if dices:
+            self.print_dices(dices, twin_dice)
+
+    def print_usr_msg_cli(self, message: str):
+        print(self.get_usr_msg_str(message), end="")
+
+    @staticmethod
+    def get_usr_msg_str(message: str) -> str:
+        if message != "":
+            message = "\nⓘ " + message + " ⓘ"
+        return "..." + message
+
+    def input_cli(self, message: str) -> tuple[
+        InputType, int | None]:
+        user_input = input(self.get_usr_inpt_msg_str(message)).strip().lower()
+        if user_input == InputType.EXIT.value:
+            exit(0)
+
+        if user_input == InputType.ENTER.value:
+            return InputType.ENTER, None
+
+        translate_result = self.translate_user_input_select(user_input)
+        if translate_result != -1:
+            return InputType.NORMAL_INDEX, translate_result
+
+        return InputType.OTHER, None
+
+    @staticmethod
+    def get_usr_inpt_msg_str(message: str) -> str:
+        return "\n≫ " + message + ": "
+
     def print_board(self, uses_white_checkers: bool):
         """Imprime el tablero del juego en la consola.
 
@@ -45,7 +80,7 @@ class CLI:
         # Imprime el tablero superior.
         print(self.generate_top_board_str(board_top_triangles, uses_white_checkers), end="")
         # Imprimir el tablero medio.
-        print(self.generate_middle_board(), end="")
+        print(self.generate_middle_board_str(), end="")
         # Imprime el tablero inferior.
         print(self.generate_bottom_board_str(board_bot_triangles, uses_white_checkers), end="")
 
@@ -234,9 +269,9 @@ class CLI:
 
         return bottom_board_str
 
-    def generate_middle_board(self) -> str:
+    def generate_middle_board_str(self) -> str:
         """Genera la representación en cadena del tablero medio.
-        
+
         Returns:
             str: Una cadena que representa el tablero medio.
         """
@@ -268,6 +303,21 @@ class CLI:
                                 )
 
         return middle_board_str
+
+    def print_dices(self, dices: tuple[Dice, ...], twin_dices: bool):
+        print(self.generate_dices_str(dices, twin_dices), end="")
+
+    @staticmethod
+    def generate_dices_str(dices: tuple[Dice, ...], twin_dices: bool) -> str:
+        dices_str = ""
+        num_columns = 2 if twin_dices else 1
+        dice_str_height = len(dices[0].dice_str)
+        for i in range(dice_str_height * num_columns):
+            if i < 5:
+                dices_str += (f"{"" if i == 0 else "\n"}" + dices[0].dice_str[i] + "  " + dices[1].dice_str[i])
+            else:
+                dices_str += ("\n" + dices[2].dice_str[i - 5] + "  " + dices[3].dice_str[i - 5])
+        return dices_str
 
     @staticmethod
     def translate_user_input_select(user_input: str) -> int:
