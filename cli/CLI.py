@@ -28,10 +28,10 @@ class CLI:
         """
         self.__board__ = board
 
-    def refresh_cli(self, uses_white_checkers: bool, dices: tuple[Dice, ...] | None, twin_dice: bool):
+    def refresh_cli(self, uses_white_checkers: bool, dices: tuple[Dice, ...] | None):
         self.print_board(uses_white_checkers)
         if dices:
-            self.print_dices(dices, twin_dice)
+            self.print_dices(dices)
 
     def print_usr_msg_cli(self, message: str):
         print(self.get_usr_msg_str(message), end="")
@@ -39,8 +39,8 @@ class CLI:
     @staticmethod
     def get_usr_msg_str(message: str) -> str:
         if message != "":
-            message = "\nⓘ " + message + " ⓘ"
-        return "..." + message
+            message = "\nⓘ " + message + " ⓘ\n"
+        return "\n..." + message
 
     def input_cli(self, message: str) -> tuple[
         InputType, int | None]:
@@ -56,6 +56,7 @@ class CLI:
             return InputType.NORMAL_INDEX, translate_result
 
         return InputType.OTHER, None
+
 
     @staticmethod
     def get_usr_inpt_msg_str(message: str) -> str:
@@ -85,7 +86,6 @@ class CLI:
         print(self.generate_bottom_board_str(board_bot_triangles, uses_white_checkers), end="")
 
     def generate_checkers_off_str(self, uses_white_checkers):
-        off_checkers_num_str = "00"
         off_checkers_color = "●" if uses_white_checkers else "○"
         off_checkers_num = self.__board__.checkers_off[0 if uses_white_checkers else 1]
         if off_checkers_num < 10:
@@ -304,13 +304,13 @@ class CLI:
 
         return middle_board_str
 
-    def print_dices(self, dices: tuple[Dice, ...], twin_dices: bool):
-        print(self.generate_dices_str(dices, twin_dices), end="")
+    def print_dices(self, dices: tuple[Dice, ...]):
+        print(self.generate_dices_str(dices), end="")
 
     @staticmethod
-    def generate_dices_str(dices: tuple[Dice, ...], twin_dices: bool) -> str:
+    def generate_dices_str(dices: tuple[Dice, ...]) -> str:
         dices_str = ""
-        num_columns = 2 if twin_dices else 1
+        num_columns = 2 if len(dices) > 2 else 1
         dice_str_height = len(dices[0].dice_str)
         for i in range(dice_str_height * num_columns):
             if i < 5:
