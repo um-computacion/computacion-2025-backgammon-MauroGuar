@@ -17,11 +17,11 @@ class BackgammonGame:
         self.__dices_values__ = []
         self.__twin_dice__ = False
 
-    def refresh(self):
+    def refresh(self, no_dices: bool = False):
         if self.__pygame_mode__:
             pass
         else:
-            self.__cli__.refresh_cli(self.__player_playing__.uses_white_checkers, self.__dices__)
+            self.__cli__.refresh_cli(self.__player_playing__.uses_white_checkers, no_dices, self.__dices__)
 
     def print_usr_message(self, message: str):
         if self.__pygame_mode__:
@@ -103,9 +103,27 @@ class BackgammonGame:
                                     self.__player_playing__.uses_white_checkers)
         self.consume_dice(user_input_normal_index, possible_moves)
 
-    def consume_dice(self, dest_triangle_normal: int,  possible_moves: dict):
+    def consume_dice(self, dest_triangle_normal: int, possible_moves: dict):
         dices_number_to_consume = possible_moves[dest_triangle_normal]
         for dcn in dices_number_to_consume:
             for dice in self.__dices__:
                 if dice.dice_number == dcn:
                     dice.reset_dice()
+
+    def interactive_roll_dices(self):
+        self.get_user_input_check_type("Presiona enter para lanzar los dados", (InputType.ENTER,))
+        self.roll_dices()
+
+    def try_return_checker(self) -> bool:
+        possible_moves = self.__board__.return_to_board_possible_moves(self.__player_playing__.uses_white_checkers,
+                                                                       self.__dices_values__)
+        if possible_moves:
+            self.refresh()
+            user_input_normal_index = self.get_user_input_check_type("Seleccione donde colocar la ficha",
+                                                                     (InputType.NORMAL_INDEX,))
+            while user_input_normal_index not in possible_moves:
+                user_input_normal_index = self.get_user_input_check_type("Seleccione un lugar válido donde "
+                                                                         "colocar la ficha", (InputType.NORMAL_INDEX,))
+            self.__board__.return_to_board(self.__player_playing__.uses_white_checkers, user_input_normal_index)
+            return True
+        return False

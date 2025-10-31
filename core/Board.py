@@ -231,7 +231,7 @@ class Board:
         # En caso contrario, no se puede mover la ficha
         return False
 
-    def move_checker(self, normal_origin: int, normal_dest: int, uses_white_checkers: bool) -> bool:
+    def move_checker(self, normal_origin: int, normal_dest: int, uses_white_checkers: bool):
         """Mueve una ficha de un triángulo a otro.
 
         No realiza ninguna verificación de validez del movimiento.
@@ -258,16 +258,10 @@ class Board:
 
         # Si el triángulo de destino tiene una sola ficha del color opuesto,
         # la ficha es comida y se actualiza la barra
-        eaten_checker = False
         if dest_triangle[0] == 1 and ((uses_white_checkers and dest_triangle[2] == "○") or
                                       (not uses_white_checkers and dest_triangle[2] == "●")):
-            if uses_white_checkers:
-                self.add_checker_to_bar(uses_white_checkers)
-                dest_triangle = [1, 0, "●"]
-            else:
-                self.add_checker_to_bar(uses_white_checkers)
-                dest_triangle = [1, 0, "○"]
-            eaten_checker = True
+            self.add_checker_to_bar(uses_white_checkers)
+            dest_triangle[2] = "●" if uses_white_checkers else "○"
 
         # Si el triángulo de destino está vacío o tiene fichas del mismo color,
         # simplemente se aumenta el conteo y se actualiza el símbolo si es necesario
@@ -277,7 +271,6 @@ class Board:
 
         self.replace_multiple_triangles([(normal_origin, origin_triangle), (normal_dest, dest_triangle)],
                                         uses_white_checkers)
-        return eaten_checker
 
     @staticmethod
     def generate_all_dice_combinations(dice_numbers: tuple[int, ...]) -> tuple:
@@ -324,12 +317,22 @@ class Board:
     @staticmethod
     def map_dice_combinations_to_normal_indexes(selected_checker_normal: int, dice_combs: tuple) -> dict:
         possible_moves_normal = {}
-        for dice_comb in dice_combs:
+        for dc in dice_combs:
             dest_normal_index = selected_checker_normal
-            for dice_num in dice_comb:
+            for dice_num in dc:
                 dest_normal_index += dice_num
-            possible_moves_normal[dest_normal_index] = dice_comb
+            if dest_normal_index >= 25:
+                dest_normal_index = 25
+            possible_moves_normal[dest_normal_index] = dc
         return possible_moves_normal
+
+    def are_there_possible_moves(self, uses_white_checkers: bool, dice_numbers: tuple[int, ...]) -> bool:
+        for normal_index in reversed(range(1, 25)):
+            if self.verify_movable_checker(normal_index, uses_white_checkers):
+                poss_dice_combs = self.get_possible_dice_combinations(normal_index, uses_white_checkers, dice_numbers)
+                if poss_dice_combs:
+                    return True
+        return False
 
     def select_checker(self, normal_index: int, uses_white_checkers: bool, dice_numbers: tuple[int, ...]) -> dict:
         """Selecciona una ficha en un triángulo específico si es movible
@@ -421,6 +424,7 @@ class Board:
         player_num = 0 if uses_white_checkers else 1
         if self.__board_bar__[player_num] > 0:
             self.__board_bar__[player_num] -= 1
+            self.__num_checkers_board_player__[player_num] += 1
             if self.__board_bar__[player_num] == 0:
                 self.__is_bar_empty__[player_num] = True
 
@@ -503,3 +507,30 @@ class Board:
                                              (not uses_white_checkers and triangle_to_check[2] == "○")):
                 return normal_index
         return -1
+
+    def return_to_board_possible_moves(self, uses_white_checkers: bool, dice_numbers: tuple[int, ...]) -> tuple:
+        possible_moves = []
+        dice_numbers = set(dice_numbers)
+        for dc in dice_numbers:
+            if self.verify_checker_placement(dc, uses_white_checkers):
+                triangle_to_mark = self.get_triangle_from_normal(dc, uses_white_checkers)
+                # Marca el triángulo como un posible movimiento
+                # (2 = Posible movimiento)
+                triangle_to_mark[1] = 2
+                self.replace_triangle(dc, uses_white_checkers, triangle_to_mark)
+                possible_moves.append(dc)
+        return tuple(possible_moves)
+
+    def return_to_board(self, uses_white_checkers: bool, dest_triangle_normal: int):
+        dest_triangle = self.get_triangle_from_normal(dest_triangle_normal, uses_white_checkers)
+        if dest_triangle[0] == 1 and ((uses_white_checkers and dest_triangle[2] == "○") or
+                                      (not uses_white_checkers and dest_triangle[2] == "●")):
+            self.add_checker_to_bar(uses_white_checkers)
+            dest_triangle[2] = "●" if uses_white_checkers else "○"
+        else:
+            dest_triangle[0] += 1
+            dest_triangle[2] = "●" if uses_white_checkers else "○"
+
+        self.replace_triangle(dest_triangle_normal, uses_white_checkers, dest_triangle)
+        self.deselect_checker(uses_white_checkers)
+        self.remove_checker_from_bar(uses_white_checkers)

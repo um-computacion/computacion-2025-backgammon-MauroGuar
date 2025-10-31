@@ -28,9 +28,9 @@ class CLI:
         """
         self.__board__ = board
 
-    def refresh_cli(self, uses_white_checkers: bool, dices: tuple[Dice, ...] | None):
+    def refresh_cli(self, uses_white_checkers: bool, no_dices: bool, dices: tuple[Dice, ...]):
         self.print_board(uses_white_checkers)
-        if dices:
+        if not no_dices:
             self.print_dices(dices)
 
     def print_usr_msg_cli(self, message: str):
