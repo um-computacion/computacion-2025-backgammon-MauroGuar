@@ -281,6 +281,7 @@ class Board:
 
     @staticmethod
     def generate_all_dice_combinations(dice_numbers: tuple[int, ...]) -> tuple:
+        dice_numbers = tuple([num for num in dice_numbers if num > 0])
         dice_combinations = []
         for i in range(1, len(dice_numbers) + 1):
             for combo in combinations(dice_numbers, i):
