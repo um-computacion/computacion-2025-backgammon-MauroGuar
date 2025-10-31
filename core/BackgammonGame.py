@@ -13,8 +13,7 @@ class BackgammonGame:
         self.__white_player__ = Player("Blanco", True)
         self.__black_player__ = Player("Negro", False)
         self.__player_playing__ = None
-        self.__dice1__ = Dice()
-        self.__dice2__ = Dice()
+        self.__dices__ = [Dice(), Dice()]
         self.__twin_dice__ = False
 
     def refresh(self, dices: tuple[int, ...] = None, twin_dice: bool = False):
@@ -46,3 +45,22 @@ class BackgammonGame:
         else:
             return self.__cli__.input_cli(input_message)
         raise Exception("Algo anduvo mal con el manejo interno del input de usuario.")
+
+    def start_dice_roll(self):
+        while True:
+            for dice in self.__dices__:
+                dice.roll_dice()
+
+            if self.__dices__[0] > self.__dices__[1]:
+                self.__player_playing__ = self.__white_player__
+                break
+            elif self.__dices__[0] < self.__dices__[1]:
+                self.__player_playing__ = self.__black_player__
+                break
+
+    def change_turn(self):
+        """Cambia el jugador que está jugando por el otro."""
+        if self.__player_playing__.uses_white_checkers:
+            self.__player_playing__ = self.__black_player__
+        else:
+            self.__player_playing__ = self.__white_player__
